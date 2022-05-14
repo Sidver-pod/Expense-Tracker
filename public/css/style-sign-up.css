@@ -1,0 +1,157 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    background-color: black;
+}
+
+.left-section {
+    left: 0;
+    top: 0;
+    bottom: 0;
+    min-width: 627px;
+    min-height: 768px;
+    position: absolute;
+    background-color: #f6f6f6;
+    z-index: 1;
+}
+
+header {
+    position: absolute;
+    width: 240px;
+    height: 60px;
+    left: 50px;
+    top: 80px;
+    font-size: 50px;
+    width: fit-content;
+    font-family: 'Indie Flower', cursive;
+    color: rgb(118, 190, 238);
+}
+
+#sign-into, #your-account {
+    position: absolute;
+    font-style: normal;
+    font-weight: 700;
+
+    display: flex;
+    align-items: center;
+
+    color: #393939;
+    width: fit-content;
+}
+
+#sign-into {
+    left: 7.32%;
+    right: 72.25%;
+    top: 20.05%;
+    bottom: 67.84%;
+    font-size: 62px;
+    line-height: 93px;
+}
+
+#your-account {
+    position: absolute;
+    left: 7.32%;
+    right: 77.31%;
+    top: 32.16%;
+    bottom: 61.98%;
+
+    font-style: normal;
+    font-weight: 700;
+    font-size: 30px;
+    line-height: 45px;
+}
+
+input {
+    position: absolute;
+    left: 7.32%;
+    right: 61.42%;
+    width: 427px;
+    padding: 5px;
+    border: 1px solid white;
+    border-radius: 5px;
+    font-size: small;
+    outline: none;
+    color: #203060;
+}
+input:focus {
+    border: 1px solid rgb(118, 190, 238);
+}
+
+#name {
+    top: 39.84%;
+    bottom: 55.21%;
+}
+
+#phoneNo {
+    top: 47.53%;
+    bottom: 47.53%;
+}
+
+#email {
+    top: 55.21%;
+    bottom: 39.84%;
+}
+
+#password {
+    top: 63.02%;
+    bottom: 32.03%;    
+}
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: #666666;
+    opacity: 1; /* Firefox */
+}
+
+.remember-me {
+    position: absolute;
+    left: 5%;
+    right: 61.42%;
+    top: 73.18%;
+    bottom: 24.48%;
+    color: #666666;
+}
+.remember-me input:hover {
+    cursor: pointer;
+}
+.remember-me label {
+    margin-left: 20%;
+    font-size: medium;
+    line-height: 18px;
+}
+
+#sign-in {
+    position: absolute;
+    left: 7.32%;
+    right: 61.42%;
+    top: 82.03%;
+    bottom: 13.02%;
+    background-color: rgb(118, 190, 238);
+    border: 1px solid rgb(118, 190, 238);
+    border-radius: 5px;
+    color:white;
+    width: 427px;
+    font-size: small;
+}
+#sign-in:hover {
+    cursor: pointer;
+} 
+
+.right-section {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    max-width: 10%;
+}
+
+.right-section img{
+    position: absolute;
+    right: 0;
+    height: 100%;
+    width: 57%;
+    object-fit: cover;
+}
