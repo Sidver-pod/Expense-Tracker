@@ -81,6 +81,25 @@ input {
 input:focus {
     border: 1px solid rgb(118, 190, 238);
 }
+.error {
+    border: 1px solid #F35D5D;
+}
+#error-phoneNo, #error-email {
+    position: absolute;
+    right: 61.42%;
+    left: 7.32%;
+    font-size: smaller;
+    color: #F35D5D;
+    width: fit-content;
+}
+#error-phoneNo {
+    top: 52.53%;
+    bottom: 42.53%;
+}
+#error-email {
+    top: 60.21%;
+    bottom: 34.84%;
+}
 
 #name {
     top: 39.84%;
@@ -115,7 +134,7 @@ input:focus {
     bottom: 24.48%;
     color: #666666;
 }
-.remember-me input:hover {
+#remember-me:hover {
     cursor: pointer;
 }
 .remember-me label {

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | Expense Tracker</title>
+    <link rel="stylesheet" href="../public/css/style-sign-in.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Poppins:wght@200;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.2/axios.min.js" defer></script>
+    <script src="../public/js/script-sign-in.js" defer></script>
+</head>
+<body>
+    <section class="left-section">
+        <header>📝 Expense Tracker</header>
+
+        <h1 id="sign-into">Sign In</h1>
+        <h2 id="your-account">To Create An Account</h2>
+        <form onsubmit="event.preventDefault();">
+            <input type="text" name="name" id="name" placeholder="Name" required>
+            <input type="tel" name="phoneNo" id="phoneNo" placeholder="Phone No." pattern="[0-9]{10}" required>
+            <input type="email" name="email" id="email" placeholder="E-Mail" required>
+            <input type="password" name="password" id="password" placeholder="Password" required>
+
+            <div class="remember-me">
+                <label for="remember-me">Remember Me</label>
+                <input type="checkbox" name="remember-me" id="remember-me"><br>
+            </div>
+
+            <input type="submit" name="sign-in" id="sign-in" value="Sign In">
+        </form>
+    </section>
+    <section class="right-section">
+        <img src="https://cdn.dribbble.com/userupload/2715766/file/original-6ad219ce50d6ad70c476f00cd9a7246b.png?filters:format(webp)?filters%3Aformat%28webp%29=&compress=1&resize=2400x1800" alt="">
+    </section>
+</body>
+</html>
