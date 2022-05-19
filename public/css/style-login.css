@@ -29,10 +29,10 @@ header {
     font-size: 50px;
     width: fit-content;
     font-family: 'Indie Flower', cursive;
-    color: rgb(118, 190, 238);
+    color: rgb(134, 153, 88);
 }
 
-#sign-into, #your-account {
+#log-in, #your-account {
     position: absolute;
     font-style: normal;
     font-weight: 700;
@@ -44,7 +44,7 @@ header {
     width: fit-content;
 }
 
-#sign-into {
+#log-in {
     left: 7.32%;
     right: 72.25%;
     top: 20.05%;
@@ -79,46 +79,40 @@ input {
     color: #203060;
 }
 input:focus {
-    border: 1px solid rgb(118, 190, 238);
+    border: 1px solid rgb(134, 153, 88);;
 }
 .error {
     border: 1px solid #F35D5D;
 }
-#error-phoneNo, #error-email {
+#error-email {
     position: absolute;
+    top: 44.84%;
+    bottom: 50.21%;
     right: 61.42%;
     left: 7.32%;
     font-size: smaller;
     color: #F35D5D;
     width: fit-content;
 }
-#error-phoneNo {
+#error-password {
+    position: absolute;
     top: 52.53%;
     bottom: 42.53%;
-}
-#error-email {
-    top: 60.21%;
-    bottom: 34.84%;
+    right: 61.42%;
+    left: 7.32%;
+    font-size: smaller;
+    color: #F35D5D;
+    width: fit-content;
 }
 
-#name {
+#email {
     top: 39.84%;
     bottom: 55.21%;
 }
 
-#phoneNo {
-    top: 47.53%;
-    bottom: 47.53%;
-}
-
-#email {
-    top: 55.21%;
-    bottom: 39.84%;
-}
-
 #password {
-    top: 63.02%;
-    bottom: 32.03%;
+    top: 47.53%;
+    bottom: 47.53%; 
 }
 
 ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
@@ -126,28 +120,45 @@ input:focus {
     opacity: 1; /* Firefox */
 }
 
-#sign-in {
+.forgot-password {
     position: absolute;
-    left: 7.32%;
+    left: 56.32%;
+    right: 13.42%;
+    top: 53.69%;
+    bottom: 43.98%;
+    color: #666666;
+    font-size: small;
+}
+.forgot-password a {
+    text-decoration: none;
+    color: #666666;
+}
+.forgot-password a:hover {
+    text-decoration: underline;
+}
+
+#login {
+    position: absolute;
+    top: 61.54%;
     right: 61.42%;
-    top: 75.03%;
-    bottom: 20.02%;
-    background-color: rgb(118, 190, 238);
-    border: 1px solid rgb(118, 190, 238);
+    bottom: 33.52%;
+    left: 7.32%;
+    background-color: rgb(134, 153, 88);;
+    border: 1px solid rgb(134, 153, 88);;
     border-radius: 5px;
     color:white;
     width: 427px;
     font-size: small;
 }
-#sign-in:hover {
+#login:hover {
     cursor: pointer;
-} 
+}
 
 #switch-page {
     position: absolute;
-    top: 82.03%;
+    top: 68.54%;
     right: 61.42%;
-    bottom: 13.02%;
+    bottom: 26.52%;
     left: 7.32%;
     width: fit-content;
     font-size: small;

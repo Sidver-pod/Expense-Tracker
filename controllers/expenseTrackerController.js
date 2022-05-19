@@ -6,10 +6,10 @@ const saltRounds = 10;
 
 exports.postSignIn = (req, res, next) => {
     let username = req.body.username;
-    let phoneNo = parseInt(req.body.phoneNo);
+    let phoneNo = req.body.phoneNo;
     let email = req.body.email;
     let password = req.body.password;
-
+    
     //bcrypt password encryption
     bcrypt
         .genSalt(saltRounds)
@@ -22,7 +22,7 @@ exports.postSignIn = (req, res, next) => {
                 phoneNo: phoneNo,
                 email: email,
                 password: hash
-            })
+            });
         })
         .then(result => {
             res.status(200).json({
@@ -43,4 +43,60 @@ exports.postSignIn = (req, res, next) => {
                 });
             }
         });
+};
+
+exports.postLogin = (req, res, next) => {
+    let email = req.body.email;
+    let plainTextPassword = req.body.password;
+
+    User.findAll({
+        where: {
+            email: email
+        }
+    })
+    .then(user => {
+        // 'email' is correct! (the length is greater than 0)
+        if(user.length) {
+            let hash = user[0].dataValues.password;
+
+            bcrypt
+                .compare(plainTextPassword, hash)
+                .then(result => {
+                    // 'true' (they match!)
+                    if(result) {
+                        res.status(200).json({
+                            'login': 'logged in successfully'
+                        });
+                    }
+                    // 'false' (they don't match)
+                    else {
+                        // 'password' is incorrect! - bad request (client error!)
+                        res.status(400).json({
+                            'login': 'password is incorrect'
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+
+                    // server error!
+                    res.status(500).json({
+                        'login': 'server error'
+                    });
+                });
+        }
+        else {
+            // 'email' is incorrect! - not found (client error!)
+            res.status(404).json({
+                'login': 'email is incorrect'
+            });
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        // server error!
+        res.status(500).json({
+            'login': 'server error'
+        });
+    });
 };
