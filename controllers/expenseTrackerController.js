@@ -4,6 +4,13 @@ const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
+/* helps the User remain logged in */
+const jwt = require('jsonwebtoken');
+
+function generateAccessToken(userId) {
+    return jwt.sign(userId, process.env.TOKEN_SECRET);
+}
+
 exports.postSignIn = (req, res, next) => {
     let username = req.body.username;
     let phoneNo = req.body.phoneNo;
@@ -64,14 +71,17 @@ exports.postLogin = (req, res, next) => {
                 .then(result => {
                     // 'true' (they match!)
                     if(result) {
+                        const token = generateAccessToken({id: user[0].dataValues.id});
+
                         res.status(200).json({
-                            'login': 'logged in successfully'
+                            'login': 'logged in successfully',
+                            'token': token
                         });
                     }
                     // 'false' (they don't match)
                     else {
-                        // 'password' is incorrect! - bad request (client error!)
-                        res.status(400).json({
+                        // 'password' is incorrect! - unauthorised (client error!)
+                        res.status(401).json({
                             'login': 'password is incorrect'
                         });
                     }

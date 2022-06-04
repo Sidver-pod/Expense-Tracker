@@ -18,6 +18,9 @@ function login(e) {
     .then(result => {
         if(result.data.login == 'logged in successfully') {
             alert(result.data.login);
+
+            const token = result.data.token;
+            localStorage.setItem('token', token);
         }
     })
     .catch(err => {
@@ -36,7 +39,7 @@ function login(e) {
                 password.classList.remove('error');
             }
         }
-        else if(err.message == 'Request failed with status code 400') {
+        else if(err.message == 'Request failed with status code 401') {
             password.classList.add('error');
             let divTemp = document.createElement('div');
             divTemp.innerText = "* Password is incorrect!";

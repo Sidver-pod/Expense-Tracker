@@ -17,3 +17,5 @@
 - **dotenv** `npm install dotenv --save`
 
 - **bcrypt** `npm install --save crypt`
+
+- **jwt** `npm install jsonwebtoken`
