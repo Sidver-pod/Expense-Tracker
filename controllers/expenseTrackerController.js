@@ -65,16 +65,18 @@ exports.postLogin = (req, res, next) => {
         // 'email' is correct! (the length is greater than 0)
         if(user.length) {
             let hash = user[0].dataValues.password;
-
+            
             bcrypt
                 .compare(plainTextPassword, hash)
                 .then(result => {
                     // 'true' (they match!)
                     if(result) {
+                        let username = user[0].dataValues.username.split(' ')[0];
                         const token = generateAccessToken({id: user[0].dataValues.id});
 
                         res.status(200).json({
                             'login': 'logged in successfully',
+                            'username': username,
                             'token': token
                         });
                     }
