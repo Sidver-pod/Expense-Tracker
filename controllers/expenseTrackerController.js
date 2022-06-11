@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const DailyExpense = require('../models/dailyExpense');
 
 /* helps secure the User password by encrypting (salting + hashing) */
 const bcrypt = require('bcrypt');
@@ -110,5 +111,105 @@ exports.postLogin = (req, res, next) => {
         res.status(500).json({
             'login': 'server error'
         });
+    });
+};
+
+exports.postTrackExpense = (req, res, next) => {
+    let userId = req.userId;
+    let category = req.body.track.category;
+    let expense = req.body.track.expense;
+    let description = req.body.track.description;
+
+    DailyExpense.create({
+        userId: userId,
+        category: category,
+        amount: expense,
+        description: description
+    })
+    .then(result => {
+        res.status(200).json({
+            'dailyExpense': 'created successfully'
+        });
+    })
+    .catch(err => {
+        console.log(err);
+        // server error!
+        res.status(500).json({
+            'dailyExpense': 'server error'
+        });
+    });
+};
+
+exports.getTrackExpense = (req, res, next) => {
+    let userId = req.userId;
+
+    User.findAll({
+        where: {
+            id: userId
+        }
+    })
+    .then(user => {
+        if(user.length) {
+            let username = user[0].dataValues.username.split(' ')[0];
+
+            res.status(200).json({
+                'username': username
+            });
+        }
+        else {
+            res.status(403);
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(403); // User does not exist (invalid token!)
+    });
+};
+
+exports.getMyExpense = (req, res, next) => {
+    let userId = req.userId;
+
+    DailyExpense.findAll({
+        where: {
+            userId: userId
+        }
+    })
+    .then(user_expense => {
+        if(user_expense.length) {
+            let user_data = user_expense;
+
+            res.status(200).json({
+                'user_data': user_data
+            });
+        }
+        else {
+            res.status(403);
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(403); // User does not exist (invalid token!)
+    });
+};
+
+exports.deleteMyExpense = (req, res, next) => {
+    const userId = req.userId;
+    const id = req.body.id;
+
+    DailyExpense.destroy({
+        where: {
+            id: id,
+            userId: userId
+        }
+    })
+    .then(result => {
+        console.log(result);
+        res.status(200).json({
+            'delete': 'successful'
+        });
+    })
+    .catch(err => {
+        console.error(err);
+        res.status(404);
     });
 };

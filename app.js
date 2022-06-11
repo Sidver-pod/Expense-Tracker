@@ -8,6 +8,10 @@ require('dotenv').config();
 
 const sequelize = require('./util/database');
 
+//database models
+const User = require('./models/user');
+const DailyExpense = require('./models/dailyExpense');
+
 const cors = require('cors');
 
 const app = express();
@@ -18,6 +22,10 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.use('/expense-tracker', expenseTrackerRoute);
+
+// One-Many association
+User.hasMany(DailyExpense);
+DailyExpense.belongsTo(User);
 
 sequelize.sync()
  .then(result => {

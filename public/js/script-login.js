@@ -2,7 +2,94 @@ document.addEventListener('DOMContentLoaded', (e) => {
     e.preventDefault();
 
     document.getElementById('form').addEventListener('submit', login);
+
+    getUserInfo();
 });
+
+function deleteMyExpense(e) {
+    e.preventDefault();
+
+    let id = e.target.id;
+    let token = localStorage.getItem('token');
+
+    axios.post('http://localhost:3000/expense-tracker/my-expense/delete', {
+        'id': id
+    },
+    {
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    })
+    .then((result) => {
+        if(result.data.delete == 'successful') {
+            alert(`Deleted successfully!`);
+            location.reload();
+        }
+        else {
+            alert(`Error! Please refresh the page and try again!`);
+        }
+    })
+    .catch(err => {
+        alert(`Error! Please refresh the page and try again!`);
+    });
+}
+
+function getUserInfo_II() {
+    return new Promise((resolve, reject) => {
+        let token = localStorage.getItem('token');
+
+        // checking if token exists; then validating the token if it complies with the secret key in the backend
+        if(token !== null) {
+            axios.get(`http://localhost:3000/expense-tracker/my-expense`, {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(result => {
+                let user_data = result.data.user_data;
+                resolve(user_data);
+            })
+            .catch(err => {
+                reject(err);
+            });
+        }
+        else {
+            /* showing the login details */
+            document.getElementsByClassName('left-section')[0].classList.remove('active');
+            document.getElementsByClassName('right-section')[0].classList.remove('active');
+            reject('Please login again!');
+        }
+    });
+}
+
+function getUserInfo() {
+    let token = localStorage.getItem('token');
+
+    // checking if token exists; then validating the token if it complies with the secret key in the backend
+    if(token !== null) {
+        axios.get(`http://localhost:3000/expense-tracker/track-expense`, {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        })
+        .then(result => {
+            const username = result.data.username;
+            dailyExpense(username);
+        })
+        .catch(err => {
+            console.log(err);
+
+            /* showing the login details */
+            document.getElementsByClassName('left-section')[0].classList.remove('active');
+            document.getElementsByClassName('right-section')[0].classList.remove('active');
+        });
+    }
+    else {
+        /* showing the login details */
+        document.getElementsByClassName('left-section')[0].classList.remove('active');
+        document.getElementsByClassName('right-section')[0].classList.remove('active');
+    }
+}
 
 function login(e) {
     e.preventDefault();
@@ -67,6 +154,142 @@ function insertAfter(newNode, existingNode) {
     existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
 }
 
+function myExpenses(e) {
+    e.preventDefault();
+
+    document.getElementById('newDiv').classList.add('active');
+
+    let newDiv2 = document.createElement('div');
+    document.getElementsByClassName('container')[0].appendChild(newDiv2);
+    newDiv2.id = 'newDiv2';
+
+    // table
+    let table = document.createElement('table');
+    newDiv2.appendChild(table);
+    table.className = 'expense-table';
+        // thead
+        let thead = document.createElement('thead');
+        table.appendChild(thead);
+            // tr for 'thead'
+            let tr_thead = document.createElement('tr');
+            thead.appendChild(tr_thead);
+                // td for 'tr_thead'
+                let td_tr_thead_1 = document.createElement('td');
+                tr_thead.appendChild(td_tr_thead_1);
+                td_tr_thead_1.innerText = 'S.No.';
+
+                let td_tr_thead_2 = document.createElement('td');
+                tr_thead.appendChild(td_tr_thead_2);
+                td_tr_thead_2.innerText = 'Category';
+
+                let td_tr_thead_3 = document.createElement('td');
+                tr_thead.appendChild(td_tr_thead_3);
+                td_tr_thead_3.innerText = 'Expense Amount (₹)';
+
+                let td_tr_thead_4 = document.createElement('td');
+                tr_thead.appendChild(td_tr_thead_4);
+                td_tr_thead_4.innerText = 'Description';
+
+                let td_tr_thead_5 = document.createElement('td');
+                tr_thead.appendChild(td_tr_thead_5);
+                td_tr_thead_5.innerText = 'Option';
+                
+        // tbody
+        let tbody = document.createElement('tbody');
+        table.appendChild(tbody);
+
+        getUserInfo_II()
+        .then(user_data => {
+            for(let i=0; i<user_data.length; i++) {
+                console.log(user_data[i]);
+                let tr = document.createElement('tr');
+                tbody.appendChild(tr);
+                
+                // S.No.
+                let td_1 = document.createElement('td');
+                tr.appendChild(td_1);
+                td_1.innerText = i+1;
+
+                // Category
+                let td_2 = document.createElement('td');
+                tr.appendChild(td_2);
+                td_2.innerText = user_data[i].category;
+
+                // Expense Amount (₹)
+                let td_3 = document.createElement('td');
+                tr.appendChild(td_3);
+                td_3.innerText = user_data[i].amount;
+
+                // Description
+                let td_4 = document.createElement('td');
+                tr.appendChild(td_4);
+                td_4.innerText = user_data[i].description;
+
+                // Options
+                let td_5 = document.createElement('td');
+                tr.appendChild(td_5);
+                    // a
+                    let a1 = document.createElement('a');
+                    td_5.appendChild(a1);
+                    a1.innerText = 'delete';
+                    a1.id = user_data[i].id;
+                    a1.addEventListener('click', deleteMyExpense);
+            }
+        })
+        .catch(err => console.error(err));
+
+    // link
+    let addNewExpense = document.createElement('a');
+    newDiv2.appendChild(addNewExpense);
+    addNewExpense.id = 'addNewExpense';
+    addNewExpense.innerText = '← Track A New Expense';
+    addNewExpense.onclick = () => {
+        // delete 'newDiv2' and go back to showing add new expense form
+        document.getElementById('newDiv2').remove();
+        document.getElementById('newDiv').classList.remove('active');
+    };
+}
+
+function track(e) {
+    e.preventDefault();
+
+    let token = localStorage.getItem('token');
+
+    // ⚠️ accessing elements and not their input value! (use .value to access input value)
+    let category = document.getElementById('category');
+    let expense = document.getElementById('expense');
+    let description = document.getElementById('description');
+
+    axios.post('http://localhost:3000/expense-tracker/track-expense', {
+        'track': {
+            'category': category.value,
+            'expense': expense.value,
+            'description': description.value
+        }
+    },
+    {
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    })
+    .then(result => {
+        if(result.data.dailyExpense == 'created successfully') {
+            alert('Added successfully');
+
+            // emtying out the input fields for a new input!
+            expense.value = "";
+            description.value = "";
+        }
+        else {
+            alert('Error! Please refresh the page and try again');
+        }
+    })
+    .catch(err => {
+        alert('Error! Please refresh the page and try again');
+        console.log(err);
+    });
+}
+
 function dailyExpense(username) {
     /* hiding the login details */
     document.getElementsByClassName('left-section')[0].classList.add('active');
@@ -129,62 +352,62 @@ function dailyExpense(username) {
             form.appendChild(spanSelect);
                 //option
                 let option0 = document.createElement('option');
-                option0.value = 'other';
+                option0.value = 'Other';
                 option0.innerText = '🛸 Other';
                 select.appendChild(option0);
 
                 let option1 = document.createElement('option');
-                option1.value = 'clothes';
+                option1.value = 'Clothes';
                 option1.innerText = '👕 Clothes';
                 select.appendChild(option1);
 
                 let option2 = document.createElement('option');
-                option2.value = 'education';
+                option2.value = 'Education';
                 option2.innerText = '🎓 Education';
                 select.appendChild(option2);
 
                 let option3 = document.createElement('option');
-                option3.value = 'electricity';
+                option3.value = 'Electricity';
                 option3.innerText = '⚡️ Electricity';
                 select.appendChild(option3);
 
                 let option4 = document.createElement('option');
-                option4.value = 'food';
+                option4.value = 'Food';
                 option4.innerText = '🌯 Food';
                 select.appendChild(option4);
 
                 let option5 = document.createElement('option');
-                option5.value = 'fuel';
+                option5.value = 'Fuel';
                 option5.innerText = '⛽️ Fuel';
                 select.appendChild(option5);
             
                 let option6= document.createElement('option');
-                option6.value = 'grocery';
+                option6.value = 'Grocery';
                 option6.innerText = '🛒 Grocery';
                 select.appendChild(option6);
 
                 let option7 = document.createElement('option');
-                option7.value = 'health';
+                option7.value = 'Health';
                 option7.innerText = '⛑ Health';
                 select.appendChild(option7);
 
                 let option8 = document.createElement('option');
-                option8.value = 'milk';
+                option8.value = 'Milk';
                 option8.innerText = '🥛 Milk';
                 select.appendChild(option8);
 
                 let option9 = document.createElement('option');
-                option9.value = 'shopping';
+                option9.value = 'Shopping';
                 option9.innerText = '🛍 Shopping';
                 select.appendChild(option9);
 
                 let option10 = document.createElement('option');
-                option10.value = 'travel';
+                option10.value = 'Travel';
                 option10.innerText = '✈️ Travel';
                 select.appendChild(option10);
 
                 let option11 = document.createElement('option');
-                option11.value = 'water';
+                option11.value = 'Water';
                 option11.innerText = '💧 Water';
                 select.appendChild(option11);
 
@@ -202,6 +425,7 @@ function dailyExpense(username) {
             input1.name = 'expense';
             input1.id = 'expense';
             input1.min = 0;
+            input1.setAttribute('required', '');
             form.appendChild(input1);
         
         form.appendChild(document.createElement('br'));
@@ -223,12 +447,21 @@ function dailyExpense(username) {
         form.appendChild(document.createElement('br'));
 
         // submit
-        let submit = document.createElement('input');
-        submit.type = 'submit';
-        submit.name = 'submit';
-        submit.id = 'submit';
-        form.appendChild(submit);
+        let trackBtn = document.createElement('input');
+        trackBtn.type = 'submit';
+        trackBtn.name = 'track';
+        trackBtn.id = 'track';
+        trackBtn.value = 'Track';
+        form.appendChild(trackBtn);
 
+    // View All My Expenses
+    let myExpensesBtn = document.createElement('a');
+    newDiv.appendChild(myExpensesBtn);
+    myExpensesBtn.id = 'myExpenses';
+    myExpensesBtn.innerText = 'View All My Expenses →';
+    myExpensesBtn.onclick = myExpenses;
+    
     // FINALLY => appending the 'container' in to the 'body'
     document.getElementsByTagName('body')[0].appendChild(container);
+    document.getElementById('daily-expense-form').addEventListener('submit', track);
 }
