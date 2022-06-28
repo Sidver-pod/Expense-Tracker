@@ -73,11 +73,13 @@ exports.postLogin = (req, res, next) => {
                     // 'true' (they match!)
                     if(result) {
                         let username = user[0].dataValues.username.split(' ')[0];
+                        let isPremiumUser = user[0].dataValues.isPremiumUser;
                         const token = generateAccessToken({id: user[0].dataValues.id});
 
                         res.status(200).json({
                             'login': 'logged in successfully',
                             'username': username,
+                            'isPremiumUser': isPremiumUser,
                             'token': token
                         });
                     }
@@ -151,18 +153,20 @@ exports.getTrackExpense = (req, res, next) => {
     .then(user => {
         if(user.length) {
             let username = user[0].dataValues.username.split(' ')[0];
+            let isPremiumUser =  user[0].dataValues.isPremiumUser;
 
             res.status(200).json({
-                'username': username
+                'username': username,
+                'isPremiumUser': isPremiumUser
             });
         }
-        else {
-            res.status(403);
+        else { console.log(user, `🚀`, user.length, `🐧`);
+            throw 'User does not exist in the database!';
         }
     })
     .catch(err => {
         console.log(err);
-        res.status(403); // User does not exist (invalid token!)
+        res.sendStatus(403); // User does not exist (invalid token!)
     });
 };
 
@@ -183,12 +187,12 @@ exports.getMyExpense = (req, res, next) => {
             });
         }
         else {
-            res.status(403);
+            res.sendStatus(403);
         }
     })
     .catch(err => {
         console.log(err);
-        res.status(403); // User does not exist (invalid token!)
+        res.sendStatus(403); // User does not exist (invalid token!)
     });
 };
 
@@ -210,6 +214,6 @@ exports.deleteMyExpense = (req, res, next) => {
     })
     .catch(err => {
         console.error(err);
-        res.status(404);
+        res.sendStatus(404);
     });
 };

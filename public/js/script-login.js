@@ -6,6 +6,70 @@ document.addEventListener('DOMContentLoaded', (e) => {
     getUserInfo();
 });
 
+function premiumMembership(e) {
+    e.preventDefault();
+
+    let body = document.getElementsByTagName('body')[0];
+
+    // popupContainer
+    let popupContainer = document.createElement('div');
+    body.appendChild(popupContainer);
+    popupContainer.classList.add('popup-container');
+
+    // popup
+    let popup = document.createElement('div');
+    popupContainer.appendChild(popup);
+    popup.classList.add('popup');
+    
+    // close
+    let close = document.createElement('button');
+    popup.appendChild(close);
+    close.classList.add('close');
+    close.innerHTML = '&times;';
+    close.onclick = (e) => {
+        e.preventDefault();
+        popupContainer.remove();
+    };
+
+    // h2
+    let heading = document.createElement('h2');
+    popup.appendChild(heading);
+    heading.classList.add('heading');
+    heading.innerText = 'Premium Membership';
+
+    // p
+    let para = document.createElement('p');
+    popup.appendChild(para);
+    para.innerText = 'By becoming a premium member you will get access to the following features -';
+
+    // ul
+    let ul = document.createElement('ul');
+    popup.appendChild(ul);
+        // li #1
+        let li_1 = document.createElement('li');
+        ul.appendChild(li_1);
+        li_1.innerText = 'Dark Mode';
+        // li #2
+        let li_2 = document.createElement('li');
+        ul.appendChild(li_2);
+        li_2.innerText = 'Premium Feeling';
+    
+    // br
+    let br = document.createElement('br');
+    popup.appendChild(br);
+    
+    // buyContainer
+    let buyContainer = document.createElement('a');
+    popup.appendChild(buyContainer);
+    buyContainer.classList.add('buy-container');
+    buyContainer.href = 'file:///Users/sidver/Documents/JS/Expense Tracker/views/payment.html';
+        //buy
+        let buy = document.createElement('span');
+        buyContainer.appendChild(buy);
+        buy.innerText = 'Buy';
+        buy.classList.add('buy');
+}
+
 function deleteMyExpense(e) {
     e.preventDefault();
 
@@ -74,7 +138,8 @@ function getUserInfo() {
         })
         .then(result => {
             const username = result.data.username;
-            dailyExpense(username);
+            const isPremiumUser = result.data.isPremiumUser;
+            dailyExpense(username, isPremiumUser);
         })
         .catch(err => {
             console.log(err);
@@ -107,12 +172,13 @@ function login(e) {
             // alert(result.data.login);
 
             const username = result.data.username;
+            const isPremiumUser = result.data.isPremiumUser;
 
             const token = result.data.token;
             localStorage.setItem('token', token);
 
             // after successfully logging in
-            dailyExpense(username);
+            dailyExpense(username, isPremiumUser);
         }
     })
     .catch(err => {
@@ -201,7 +267,6 @@ function myExpenses(e) {
         getUserInfo_II()
         .then(user_data => {
             for(let i=0; i<user_data.length; i++) {
-                console.log(user_data[i]);
                 let tr = document.createElement('tr');
                 tbody.appendChild(tr);
                 
@@ -238,6 +303,14 @@ function myExpenses(e) {
         })
         .catch(err => console.error(err));
 
+    /* Dark Mode */
+    let containerChangeTheme = document.getElementsByClassName('container')[0];
+    let darkMode = containerChangeTheme.classList.contains('dark'); // boolean value
+    if(darkMode) {
+        table.classList.add('expense-table-dark');
+        thead.classList.add('expense-table-thead-dark');
+    }
+    
     // link
     let addNewExpense = document.createElement('a');
     newDiv2.appendChild(addNewExpense);
@@ -290,7 +363,7 @@ function track(e) {
     });
 }
 
-function dailyExpense(username) {
+function dailyExpense(username, isPremiumUser) {
     /* hiding the login details */
     document.getElementsByClassName('left-section')[0].classList.add('active');
     document.getElementsByClassName('right-section')[0].classList.add('active');
@@ -326,6 +399,56 @@ function dailyExpense(username) {
     h2.innerText = `Hi ${username}!`;
     h2.classList.add('Hi');
     container.appendChild(h2);
+
+    if(!isPremiumUser) {
+        //Buy Premium Membership
+        let premium = document.createElement('a');
+        premium.innerText = '- Buy Premium Membership -';
+        premium.id = 'premium';
+        premium.onclick = premiumMembership;
+        container.appendChild(premium);
+    }
+    else {
+        // Dark Mode
+        let darkMode_Button = document.createElement('button');
+        darkMode_Button.innerText = 'Change Theme';
+        darkMode_Button.id = 'changeTheme';
+        darkMode_Button.onclick = (e) => {
+            e.preventDefault();
+
+            let containerChangeTheme = document.getElementsByClassName('container')[0];
+            let darkMode = containerChangeTheme.classList.contains('dark'); // boolean value
+            let Hi = document.getElementsByClassName('Hi')[0];
+            let labelTag = document.getElementsByTagName('label');
+            let expenseTable = document.getElementsByClassName('expense-table')[0];
+            let tHead = document.getElementsByTagName('thead')[0];
+
+            /* toggling between themes */
+            if(darkMode) {
+                containerChangeTheme.classList.remove('dark');
+                Hi.classList.remove('Hi_dark');
+                for(let i=0; i<labelTag.length; i++) {
+                    labelTag[i].classList.remove('label_dark');
+                }
+                if(expenseTable) {
+                    expenseTable.classList.remove('expense-table-dark');
+                    tHead.classList.remove('expense-table-thead-dark');
+                }
+            }
+            else {
+                containerChangeTheme.classList.add('dark');
+                Hi.classList.add('Hi_dark');
+                for(let i=0; i<labelTag.length; i++) {
+                    labelTag[i].classList.add('label_dark');
+                }
+                if(expenseTable) {
+                    expenseTable.classList.add('expense-table-dark');
+                    tHead.classList.add('expense-table-thead-dark');
+                }
+            }
+        };
+        container.appendChild(darkMode_Button);
+    }
 
     //'div' for 'form'
     let newDiv = document.createElement('div');
@@ -464,4 +587,20 @@ function dailyExpense(username) {
     // FINALLY => appending the 'container' in to the 'body'
     document.getElementsByTagName('body')[0].appendChild(container);
     document.getElementById('daily-expense-form').addEventListener('submit', track);
+
+    /* runs only for the first time after the user becomes a Premium User! */
+    if(localStorage.getItem('isPremiumUser') == 'true') {
+        localStorage.removeItem('isPremiumUser');
+
+        /* same code as the one in 'Dark Mode' */
+        let containerChangeTheme = document.getElementsByClassName('container')[0];
+        let Hi = document.getElementsByClassName('Hi')[0];
+        let labelTag = document.getElementsByTagName('label');
+
+        containerChangeTheme.classList.add('dark');
+        Hi.classList.add('Hi_dark');
+        for(let i=0; i<labelTag.length; i++) {
+            labelTag[i].classList.add('label_dark');
+        }
+    }
 }

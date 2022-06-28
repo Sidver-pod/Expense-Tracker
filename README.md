@@ -19,3 +19,5 @@
 - **bcrypt** `npm install --save crypt`
 
 - **jwt** `npm install jsonwebtoken`
+
+- **Razorpay** `npm install razorpay`

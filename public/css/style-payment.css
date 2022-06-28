@@ -1,0 +1,14 @@
+body {
+    background-color: #f6f6f6;
+}
+
+a {
+    color: salmon;
+    font-family: 'Poppins', sans-serif;
+    font-weight: bolder;
+    font-size: medium;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
