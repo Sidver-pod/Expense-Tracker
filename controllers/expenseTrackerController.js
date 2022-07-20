@@ -160,7 +160,7 @@ exports.getTrackExpense = (req, res, next) => {
                 'isPremiumUser': isPremiumUser
             });
         }
-        else { console.log(user, `🚀`, user.length, `🐧`);
+        else {
             throw 'User does not exist in the database!';
         }
     })
@@ -172,6 +172,10 @@ exports.getTrackExpense = (req, res, next) => {
 
 exports.getMyExpense = (req, res, next) => {
     let userId = req.userId;
+
+    if(req.headers['userid']) {
+        userId = req.headers['userid'];
+    }
 
     DailyExpense.findAll({
         where: {
@@ -217,3 +221,91 @@ exports.deleteMyExpense = (req, res, next) => {
         res.sendStatus(404);
     });
 };
+
+exports.getMyLeaderboard = (req, res, next) => {
+    let arr = [];
+
+    DailyExpense.findAll()
+    .then(users_data => {
+        let myMap = new Map(); // hashtable
+
+        for(let user_data of users_data) {
+            let userId = user_data.dataValues.userId;
+            let expenseAmount = user_data.dataValues.amount;
+
+            // for a 'userId' that already exists in the hashtable
+            if(myMap.get(userId)) {
+                myMap.set(userId, (myMap.get(userId) + expenseAmount));
+            }
+            // for a new 'userId'
+            else {
+                myMap.set(userId, expenseAmount);
+                arr.push({
+                    userId: userId,
+                    name: 'temporary',
+                    totalExpenseAmount: 0
+                });
+            }
+        }
+
+        // putting all the summed up values from the hashtable into the array's objects
+        for(let i of arr) {
+            let totalExpenseAmount = myMap.get(i.userId);
+            i.totalExpenseAmount = totalExpenseAmount;
+        }
+
+        // sorting the array with respect to the 'totalExpenseAmount'
+        arr.sort((a, b) => {
+            if(a.totalExpenseAmount < b.totalExpenseAmount) {
+                return -1;
+            }
+            else if(a.totalExpenseAmount > b.totalExpenseAmount) {
+                return 1;
+            }
+            else return 0;
+        });
+    })
+    .then(() => {
+        return User.findAll();
+    })
+    .then(users_data => {
+        let myMap = new Map(); // new hashtable
+        
+        for(let user_data of users_data) {
+            let userId = user_data.dataValues.id;
+            let username = user_data.dataValues.username;
+            myMap.set(userId, username);
+        }
+
+        for(let i of arr) {
+            let name = myMap.get(i.userId);
+            i.name = name;
+        }
+
+        res.status(200).json({
+            arr : arr,
+            userId: req.userId
+        });
+    })
+    .catch(err => {
+        console.log(err);
+        res.sendStatus(500); // Internal Server Error!
+    });
+};
+
+// #1 get all the data from 'DailyExpense'
+
+// #2 keep a hashtable to bookmark => new IDs with an expense amount / increment existing ones by adding
+    // when you come across a 'new ID' => form a new element in an array with values {userId: #, name: 'temporary', totalExpenseAmount: 0}
+
+// #3 at the end, after all of the above are accomplished, iterate through the array and check against the 'userId' in the hashtable and take out the 'expense amount' and store it in totalExpenseAmount for every element of the array
+
+// #4 sort the array with respect to totalExpenseAmount
+
+// #5 Now, get all the data from 'User'
+
+// #6 Iterate through the data and keep recording the 'names' in a new hashtable with 'userId' as the key
+
+// #7 Iterate through the array and put in the correct 'name' with the help of the 'userId'
+
+// #8 send the array!

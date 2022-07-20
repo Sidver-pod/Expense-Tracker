@@ -12,6 +12,7 @@ router.post('/track-expense', authenticateToken, expenseTrackerController.postTr
 router.get('/track-expense', authenticateToken, expenseTrackerController.getTrackExpense);
 router.get('/my-expense', authenticateToken, expenseTrackerController.getMyExpense);
 router.post('/my-expense/delete', authenticateToken, expenseTrackerController.deleteMyExpense);
+router.get('/my-leaderboard', authenticateToken, expenseTrackerController.getMyLeaderboard);
 
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];

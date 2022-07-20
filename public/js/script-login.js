@@ -6,6 +6,168 @@ document.addEventListener('DOMContentLoaded', (e) => {
     getUserInfo();
 });
 
+function viewExpense(e) {
+    e.preventDefault();
+
+    let userId = e.target.id;
+    let token = localStorage.getItem('token');
+
+    axios.get('http://localhost:3000/expense-tracker/my-expense', {
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'userid': userId
+        }
+    })
+    .then(user_data => {
+        let newDiv3 = document.getElementById('newDiv3');
+
+        // making a Popup container
+        let popupContainer = document.createElement('div');
+        newDiv3.appendChild(popupContainer);
+        popupContainer.className = 'popup-container';
+
+        // making the Popup
+        let popup = document.createElement('section');
+        popupContainer.appendChild(popup);
+        popup.className = 'popup-view-expense';
+
+        // Nameplate
+        let nameplate = document.createElement('div');
+        popup.appendChild(nameplate);
+        nameplate.className = 'nameplate';
+            // #1 (rank & name)
+            let rankName = document.createElement('span');
+            nameplate.appendChild(rankName);
+            let rank = e.target.parentElement.parentElement.children[0].innerText;
+            let name = e.target.parentElement.parentElement.children[1].innerText;
+            rankName.innerText = `${rank} ${name}`;
+            // #2 (total expense amount)
+            let total = document.createElement('span');
+            nameplate.appendChild(total);
+            let totalExpenseAmount = e.target.parentElement.parentElement.children[2].innerText;
+            total.innerText = `₹${totalExpenseAmount}`;
+
+        // Bar Graph Container
+        let barGraphContainer = document.createElement('span');
+        popup.appendChild(barGraphContainer);
+        barGraphContainer.id = 'bar-graph-container';
+
+        // Bar Graph Legend
+        let barGraphLegend = document.createElement('span');
+        popup.appendChild(barGraphLegend);
+        barGraphLegend.id = 'bar-graph-legend';
+        // ul
+        let u_list = document.createElement('ul');
+        barGraphLegend.appendChild(u_list);
+        u_list.style.listStyle = 'none';
+
+        // close
+        let close = document.createElement('button');
+        popup.appendChild(close);
+        close.className = 'closeViewExpense';
+        close.innerHTML = '&times;';
+        close.onclick = (e) => {
+            e.preventDefault();
+            popupContainer.remove();
+        };
+
+        // * NOTE (for instructing the user on how to use the chart)
+        let note = document.createElement('div');
+        popup.appendChild(note);
+        note.className = 'note';
+        note.innerHTML = `Note: The downward-bar-graph for a category represents the percentage of expenditure for that category out of the total expense amount. In other words, <u>the lower the bar the higher the expense!</u> You can hover your cursor over the legends on the right to see the respective bar highlight itself in the graph.`;
+
+        let arr = user_data.data.user_data;
+        let myMap = new Map(); // hashtable #1
+        let colorMap = new Map(); // hashtable #2
+        let totalAmount = 0;
+
+        let categoryArr = ['Other', 'Clothes', 'Education', 'Electricity', 'Food', 'Fuel', 'Grocery', 'Health', 'Milk', 'Shopping', 'Travel', 'Water'];
+
+        colorMap.set('Other', '#E15F59'); colorMap.set('Clothes', '#F2A051'); colorMap.set('Education', '#F8D558'); colorMap.set('Electricity', '#5FbF86'); colorMap.set('Food', '#4C8EE8'); colorMap.set('Fuel', '#6448F1'); colorMap.set('Grocery', '#A561D2'); colorMap.set('Health', '#222222'); colorMap.set('Milk', '#DD5FA6'); colorMap.set('Shopping', '#D0B792'); colorMap.set('Travel', '#C2C2C2'); colorMap.set('Water', '#91ACBE');
+
+        for(let i of categoryArr) {
+            let category = i;
+            myMap.set(category, 0); // setting 'amount' for each category = 0
+        }
+
+        for(let i of arr) {
+            let category = i.category; 
+            let amount = i.amount;
+
+            totalAmount += amount;
+            
+            myMap.set(category, (myMap.get(category) + amount));
+        }
+
+        let counter = 1; // for Grid row number range!
+        for(let i of categoryArr) {
+            let category = i;
+            let amount = myMap.get(category);
+            let percentage = amount/totalAmount;
+
+            // Creating Bar Graph
+            let bar = document.createElement('span');
+            barGraphContainer.appendChild(bar);
+            bar.style.height = `${percentage * 300}px`;
+            bar.style.border = `1px solid ${colorMap.get(category)}`;
+            bar.id = category;
+
+            // Creating Bar Graph Legend - #1
+            let li = document.createElement('li');
+            u_list.appendChild(li);
+            li.innerText = category;
+            li.style.color = colorMap.get(category);
+            li.style.fontSize = '1.2rem';
+            li.style.cursor = 'pointer';
+            li.style.display = 'grid';
+            li.style.gridRow = `${counter} / ${counter+1}`;
+            li.style.gridColumn = '1 / 2';
+            li.addEventListener('mouseover', (e) => {
+                e.preventDefault();
+                let _category = e.target.innerText;
+                let _span = document.getElementById(_category);
+                _span.style.backgroundColor = colorMap.get(_category);
+            });
+            li.addEventListener('mouseleave', (e) => {
+                e.preventDefault();
+                let _category = e.target.innerText;
+                let _span = document.getElementById(_category);
+                _span.style.backgroundColor = '#f6f6f6';
+            });
+
+            // Creating Bar Graph Legend - #2
+            let li2 = document.createElement('li');
+            u_list.appendChild(li2);
+            li2.innerText = `₹${myMap.get(category)}`;
+            li2.style.color = colorMap.get(category);
+            li2.style.fontSize = '1.2rem';
+            li2.style.cursor = 'pointer';
+            li2.style.display = 'grid';
+            li2.style.gridRow = `${counter} / ${counter+1}`;
+            li2.style.gridColumn = '2 / 3';
+            li2.addEventListener('mouseover', (e) => {
+                e.preventDefault();
+                let _category = e.target.previousElementSibling.innerText;
+                let _span = document.getElementById(_category);
+                _span.style.backgroundColor = colorMap.get(_category);
+            });
+            li2.addEventListener('mouseleave', (e) => {
+                e.preventDefault();
+                let _category = e.target.previousElementSibling.innerText;
+                let _span = document.getElementById(_category);
+                _span.style.backgroundColor = '#f6f6f6';
+            });
+
+            counter++; // update
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert(`Error! Please refresh the page and try again!`);
+    });
+}
+
 function premiumMembership(e) {
     e.preventDefault();
 
@@ -52,7 +214,11 @@ function premiumMembership(e) {
         // li #2
         let li_2 = document.createElement('li');
         ul.appendChild(li_2);
-        li_2.innerText = 'Premium Feeling';
+        li_2.innerText = 'Leaderboard';
+        // li #3
+        let li_3 = document.createElement('li');
+        ul.appendChild(li_3);
+        li_3.innerText = 'Premium Feeling';
     
     // br
     let br = document.createElement('br');
@@ -95,6 +261,32 @@ function deleteMyExpense(e) {
     })
     .catch(err => {
         alert(`Error! Please refresh the page and try again!`);
+    });
+}
+
+function getLeaderboardInfo() {
+    return new Promise((resolve, reject) => {
+        let token = localStorage.getItem('token');
+
+        if(token !== null) {
+            axios.get('http://localhost:3000/expense-tracker/my-leaderboard', {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(leaderboardInfo => {
+                resolve(leaderboardInfo.data);
+            })
+            .catch(err => {
+                reject(err);
+            });
+        }
+        else {
+            /* showing the login details */
+            document.getElementsByClassName('left-section')[0].classList.remove('active');
+            document.getElementsByClassName('right-section')[0].classList.remove('active');
+            reject('Please login again!');
+        }
     });
 }
 
@@ -290,7 +482,7 @@ function myExpenses(e) {
                 tr.appendChild(td_4);
                 td_4.innerText = user_data[i].description;
 
-                // Options
+                // Option
                 let td_5 = document.createElement('td');
                 tr.appendChild(td_5);
                     // a
@@ -420,8 +612,11 @@ function dailyExpense(username, isPremiumUser) {
             let darkMode = containerChangeTheme.classList.contains('dark'); // boolean value
             let Hi = document.getElementsByClassName('Hi')[0];
             let labelTag = document.getElementsByTagName('label');
+            // Expense Table
             let expenseTable = document.getElementsByClassName('expense-table')[0];
             let tHead = document.getElementsByTagName('thead')[0];
+            // Leaderboard Table
+            let leaderboardTable = document.getElementsByClassName('leaderboard-table')[0];
 
             /* toggling between themes */
             if(darkMode) {
@@ -434,6 +629,10 @@ function dailyExpense(username, isPremiumUser) {
                     expenseTable.classList.remove('expense-table-dark');
                     tHead.classList.remove('expense-table-thead-dark');
                 }
+                if(leaderboardTable) {
+                    leaderboardTable.classList.remove('leaderboard-table-dark');
+                    tHead.classList.remove('leaderboard-table-thead-dark');
+                }
             }
             else {
                 containerChangeTheme.classList.add('dark');
@@ -445,9 +644,143 @@ function dailyExpense(username, isPremiumUser) {
                     expenseTable.classList.add('expense-table-dark');
                     tHead.classList.add('expense-table-thead-dark');
                 }
+                if(leaderboardTable) {
+                    leaderboardTable.classList.add('leaderboard-table-dark');
+                    tHead.classList.add('leaderboard-table-thead-dark');
+                }
             }
         };
         container.appendChild(darkMode_Button);
+
+        // Leaderboard
+        let leaderboard_Button = document.createElement('button');
+        leaderboard_Button.innerText = 'View Leaderboard';
+        leaderboard_Button.id = 'view-leaderboard';
+        leaderboard_Button.onclick = (e) => {
+            e.preventDefault();
+
+            if(document.getElementById('newDiv3')) {
+                // If Exists Then Do Nothing!
+            }
+            else {
+                let newDiv = document.getElementById('newDiv');
+                let newDiv2 = document.getElementById('newDiv2');
+                if(newDiv2) {
+                    newDiv2.remove();
+                }
+                else {
+                    newDiv.classList.add('active');
+                }
+    
+                let leaderboard_Div = document.createElement('div');
+                container.appendChild(leaderboard_Div);
+                leaderboard_Div.id = 'newDiv3';
+    
+                // table
+                let leaderboard_table = document.createElement('table');
+                leaderboard_Div.appendChild(leaderboard_table);
+                leaderboard_table.className = 'leaderboard-table';
+                    // thead
+                    let thead = document.createElement('thead');
+                    leaderboard_table.appendChild(thead);
+                        // #1 tr for 'thead'
+                        let tr_leaderboard = document.createElement('tr');
+                        thead.appendChild(tr_leaderboard);
+                            // td for 'tr_leaderboard'
+                            let td_leaderboard = document.createElement('td');
+                            tr_leaderboard.appendChild(td_leaderboard);
+                            td_leaderboard.innerText = 'Leaderboard';
+                            td_leaderboard.colSpan = 4;
+    
+                        // #2 tr for 'thead'
+                        let tr_thead = document.createElement('tr');
+                        thead.appendChild(tr_thead);
+                            // td for 'tr_thead'
+                            let td_tr_thead_1 = document.createElement('td');
+                            tr_thead.appendChild(td_tr_thead_1);
+                            td_tr_thead_1.innerText = 'Rank';
+    
+                            let td_tr_thead_2 = document.createElement('td');
+                            tr_thead.appendChild(td_tr_thead_2);
+                            td_tr_thead_2.innerText = 'Name';
+    
+                            let td_tr_thead_3 = document.createElement('td');
+                            tr_thead.appendChild(td_tr_thead_3);
+                            td_tr_thead_3.innerText = 'Total Expense Amount (₹)';
+    
+                            let td_tr_thead_4 = document.createElement('td');
+                            tr_thead.appendChild(td_tr_thead_4);
+                            td_tr_thead_4.innerText = 'Option';
+                    
+                    // tbody
+                    let tbody = document.createElement('tbody');
+                    leaderboard_table.appendChild(tbody);
+
+                    getLeaderboardInfo()
+                    .then(leaderboardInfo => {
+                        let arr = leaderboardInfo.arr;
+                        let userId = leaderboardInfo.userId;
+
+                        for(let i=0; i<arr.length; i++) {
+                            let tr = document.createElement('tr');
+                            tbody.appendChild(tr);
+
+                            // for highlighting the current User's stat in the leaderboard!
+                            if(arr[i].userId == userId) {
+                                tr.style.border = '2px solid #FFD877';
+                            }
+
+                            // Rank
+                            let td_1 = document.createElement('td');
+                            tr.appendChild(td_1);
+                            td_1.innerText = '#' + `${i+1}`;
+
+                            // Name
+                            let td_2 = document.createElement('td');
+                            tr.appendChild(td_2);
+                            td_2.innerText = arr[i].name;
+
+                            // Total Expense Amount (₹)
+                            let td_3 = document.createElement('td');
+                            tr.appendChild(td_3);
+                            td_3.innerText = arr[i].totalExpenseAmount;
+
+                            // Option
+                            let td_5 = document.createElement('td');
+                            tr.appendChild(td_5);
+                                // a
+                                let a1 = document.createElement('a');
+                                td_5.appendChild(a1);
+                                a1.innerText = 'view expense graph';
+                                a1.id = arr[i].userId;
+                                a1.addEventListener('click', viewExpense);
+                        }
+
+                        /* Dark Mode */
+                        let containerChangeTheme = document.getElementsByClassName('container')[0];
+                        let darkMode = containerChangeTheme.classList.contains('dark'); // boolean value
+                        if(darkMode) {
+                            leaderboard_table.classList.add('leaderboard-table-dark');
+                            thead.classList.add('leaderboard-table-thead-dark');
+                        }
+
+                        // link
+                        let addNewExpense = document.createElement('a');
+                        leaderboard_Div.appendChild(addNewExpense);
+                        addNewExpense.id = 'addNewExpense';
+                        addNewExpense.innerText = '← Go Back';
+                        addNewExpense.onclick = () => {
+                            // delete 'newDiv3' and go back
+                            document.getElementById('newDiv3').remove();
+                            document.getElementById('newDiv').classList.remove('active');
+                        };
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
+            }
+        };
+        container.appendChild(leaderboard_Button);
     }
 
     //'div' for 'form'
@@ -548,6 +881,7 @@ function dailyExpense(username, isPremiumUser) {
             input1.name = 'expense';
             input1.id = 'expense';
             input1.min = 0;
+            input1.step = 0.01;
             input1.setAttribute('required', '');
             form.appendChild(input1);
         

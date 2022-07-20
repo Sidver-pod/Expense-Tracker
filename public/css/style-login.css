@@ -276,19 +276,33 @@ input:focus {
     color: #f6f6f6;
 }
 
-.expense-table-dark {
+.expense-table-dark, .leaderboard-table-dark {
     color: #f6f6f6;
+}
+.leaderboard-table-thead-dark tr:nth-child(1) {
+    color: black;
 }
 .expense-table-thead-dark {
     border-top-color: #f6f6f6;
     border-bottom-color: #f6f6f6;
 }
+.leaderboard-table-thead-dark {
+    border-bottom-color: #f6f6f6;
+}
 
-#newDiv, #newDiv2 {
+#view-leaderboard {
+    position: absolute;
+    top: 165px;
+    right: 5%;
+    padding: 5px;
+    cursor: pointer;
+}
+
+#newDiv, #newDiv2, #newDiv3 {
     display: flex;
     justify-content: center;
 }
-#newDiv2 {
+#newDiv2, #newDiv3 {
     overflow-x: auto;
     overflow-y: auto;
     max-height: min-content;
@@ -399,6 +413,8 @@ input[type=number] {
     text-decoration: underline;
 }
 
+/* Expense Table */
+
 .expense-table {
     /* position: absolute; */
     margin-top: 15%;
@@ -422,10 +438,10 @@ input[type=number] {
 .expense-table tbody tr td {
     padding: 8px;
 }
-.invoice-table thead tr td:nth-last-child(1),
-.invoice-table tbody tr td:nth-last-child(1) {
+/* .expense-table thead tr td:nth-last-child(1),
+.expense-table tbody tr td:nth-last-child(1) {
     text-align: right;
-}
+} */
 .expense-table tbody tr td a {
     cursor: pointer;
     color: rgb(102, 102, 102);
@@ -433,6 +449,38 @@ input[type=number] {
 .expense-table tbody tr td a:hover {
     color: #F35D5D;
 }
+
+/* Leaderboard Table */
+
+.leaderboard-table {
+    margin-top: 15%;
+    border-collapse: collapse;
+    width: 50em;
+    min-height: min-content;
+    min-width: fit-content;
+}
+.leaderboard-table thead tr:nth-child(1) {
+    background-color: #FFD877;
+    text-align: center;
+}
+.leaderboard-table thead tr:nth-child(2) {
+    border-bottom: 1px dashed black;
+}
+.leaderboard-table thead tr td {
+    font-size: 18px;
+    letter-spacing: 1px;
+    padding: 8px;
+    border-radius: 6px;
+}
+.leaderboard-table tbody tr td a {
+    cursor: pointer;
+    color: rgb(102, 102, 102);
+}
+.leaderboard-table tbody tr td a:hover {
+    color: #F35D5D;
+}
+
+/* Premium Membership Popup | View Expense (popup-container) */
 
 .popup-container {
     position: fixed;
@@ -483,4 +531,81 @@ input[type=number] {
     background-color: #FFD877;
     border-radius: 5px;
     padding: 8px;
+}
+
+/* View Expense Popup */
+
+.popup-view-expense {
+    background-color: #f6f6f6;
+    border-radius: 5px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+    padding: 2rem;
+    padding-top: 3rem;
+    width: 980px;
+    height: 610px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.nameplate {
+    width: 100%;
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: flex;
+    /* margin-top: 5px; */
+    justify-content: space-between;
+    padding-right: 15px;
+}
+
+#bar-graph-container {
+    width: 630px;/* 70% */
+    height: 400px;/* 80% */
+    border-top: 1px dashed black;
+    border-bottom: 1px dashed black;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+#bar-graph-legend {
+    width: 270px;
+    height: 400px;
+    border-top: 1px dashed black;
+    border-bottom: 1px dashed black;
+    margin-top: 1rem;
+    display: flex;
+}
+
+#bar-graph-legend ul {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: repeat(12, 1fr);
+    column-gap: 2rem;
+}
+
+.closeViewExpense {
+    margin-top: -75px;
+    margin-right: -30px;
+    width: fit-content;
+    height: fit-content;
+    border: 1px solid #f6f6f6;
+    background-color: #f6f6f6;
+    font-size: 2rem;
+    color: black;
+    cursor: pointer;
+}
+
+#bar-graph-container span {
+    width: 36px;
+    /* height: 300px; */
+    /* border: 1px solid salmon; */
+    border-radius: 3px;
+    margin-left: 5px;
+    margin-top: 12.5%;
+    margin-bottom: 12.5%; /* 50/400 */
+}
+
+.note {
+    margin-top: 2%;
+    font-style: italic;
 }
