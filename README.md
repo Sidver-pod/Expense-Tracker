@@ -16,8 +16,12 @@
 
 - **dotenv** `npm install dotenv --save`
 
-- **bcrypt** `npm install --save crypt`
+- **bcrypt** `npm install --save bcrypt`
 
 - **jwt** `npm install jsonwebtoken`
 
 - **Razorpay** `npm install razorpay`
+
+- **SendGrid** `npm install --save @sendgrid/mail`
+
+- **uuid** `npm i uuid` *(or make use of the in-built UUID data type in Sequelize directly for defining the data type; I did the one in parentheses!)*

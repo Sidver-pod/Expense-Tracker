@@ -2,9 +2,93 @@ document.addEventListener('DOMContentLoaded', (e) => {
     e.preventDefault();
 
     document.getElementById('form').addEventListener('submit', login);
+    document.getElementsByClassName('forgot-password')[0].addEventListener('click', forgotPassword);
 
     getUserInfo();
 });
+
+function checkPassword(emailAddress) {
+    return new Promise((resolve, reject) => {
+        axios.post('http://localhost:3000/password/forgot', {
+            'emailAddress': emailAddress
+        })
+        .then(result => {
+            resolve(result.data);
+        })
+        .catch(err => {
+            reject(err);
+        });
+    });
+}
+
+function forgotPassword(e) {
+    e.preventDefault();
+
+    let body = document.getElementsByTagName('body')[0];
+    
+    // Popup Container
+    let popupContainer = document.createElement('div');
+    body.appendChild(popupContainer);
+    popupContainer.className = 'popup-container';
+    popupContainer.style.zIndex = '2';
+
+    // Popup
+    let popup = document.createElement('div');
+    popupContainer.appendChild(popup);
+    popup.className = 'popup-forgot-password';
+
+    // Close
+    let div0 = document.createElement('div');
+    let close = document.createElement('button');
+    div0.appendChild(close);
+    popup.appendChild(div0);
+    close.className = 'close-forgot-password';
+    close.innerHTML = '&times;';
+    close.onclick = (e) => {
+        e.preventDefault();
+        popupContainer.remove();
+    };
+
+    // h2
+    let div1 = document.createElement('div');
+    let h2 = document.createElement('h2');
+    div1.appendChild(h2);
+    popup.appendChild(div1);
+    h2.innerText = 'Reset Your Password';
+
+    // Form
+    let div2 = document.createElement('div');
+    let form = document.createElement('form');
+    div2.appendChild(form);
+    popup.appendChild(div2);
+        // Email
+        let email = document.createElement('input');
+        form.appendChild(email);
+        email.type = 'email';
+        email.placeholder = 'E-Mail';
+        email.required = true;
+        // Reset
+        let reset = document.createElement('input');
+        form.appendChild(reset);
+        reset.type = 'submit';
+        reset.name = 'reset';
+        reset.value = 'Reset';
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        let emailAddress = e.target.firstElementChild.value;
+
+        await checkPassword(emailAddress)
+        .then(result => {
+            alert(result.email);
+        })
+        .catch(err => {
+            console.error(err);
+            alert(`Error! Please refresh the page and try again.`);
+        });
+    });
+}
 
 function viewExpense(e) {
     e.preventDefault();

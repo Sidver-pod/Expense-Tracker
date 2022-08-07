@@ -136,6 +136,7 @@ input:focus {
 .forgot-password a {
     text-decoration: none;
     color: #666666;
+    cursor: pointer;
 }
 .forgot-password a:hover {
     text-decoration: underline;
@@ -480,7 +481,7 @@ input[type=number] {
     color: #F35D5D;
 }
 
-/* Premium Membership Popup | View Expense (popup-container) */
+/* Premium Membership Popup | View Expense Graph (popup-container) | Forgot Password (popup-container) */
 
 .popup-container {
     position: fixed;
@@ -597,8 +598,6 @@ input[type=number] {
 
 #bar-graph-container span {
     width: 36px;
-    /* height: 300px; */
-    /* border: 1px solid salmon; */
     border-radius: 3px;
     margin-left: 5px;
     margin-top: 12.5%;
@@ -608,4 +607,68 @@ input[type=number] {
 .note {
     margin-top: 2%;
     font-style: italic;
+}
+
+/* Forgot Password */
+
+.popup-forgot-password {
+    width: 500px;
+    height: 240px;
+    background-color: #f6f6f6;
+    border-radius: 5px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+    padding: 2rem;
+    
+    /* display: flex; */
+    flex-direction: column;
+}
+
+.popup-forgot-password input {
+    position: initial;
+    /* width: 300px; */
+}
+
+.close-forgot-password {
+    width: fit-content;
+    height: fit-content;
+    border: 1px solid #f6f6f6;
+    background-color: #f6f6f6;
+    font-size: 2rem;
+    color: black;
+    cursor: pointer;
+}
+.popup-forgot-password div:nth-child(1) {
+    /* div (close) */
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -20px;
+    margin-left: 20px;
+}
+
+.popup-forgot-password div:nth-child(2) {
+    /* div (h2) */
+    margin-top: -30px;
+}
+
+.popup-forgot-password div:nth-child(3) form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.popup-forgot-password div:nth-child(3) form input:nth-child(1) { 
+    /* email */
+    height: 40px;
+}
+
+.popup-forgot-password div:nth-child(3) form input:nth-child(2) {
+    /* reset */
+    height: 40px;
+    background-color: #393939;
+    border: 1ps solid #393939;
+    color: #f6f6f6;
+    cursor: pointer;
+    margin-top: 24px;
 }

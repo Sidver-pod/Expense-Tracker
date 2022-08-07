@@ -191,7 +191,7 @@ exports.getMyExpense = (req, res, next) => {
             });
         }
         else {
-            res.sendStatus(403);
+            res.sendStatus(404); // Not Found
         }
     })
     .catch(err => {
