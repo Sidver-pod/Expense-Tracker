@@ -676,8 +676,119 @@ function dailyExpense(username, isPremiumUser) {
     h2.classList.add('Hi');
     container.appendChild(h2);
 
+    // Generate Report
+    let generateReport = document.createElement('button');
+    generateReport.innerText = 'Generate Report';
+    generateReport.id = 'generate-report';
+    generateReport.onclick = (e) => {
+        e.preventDefault();
+
+        let body = document.getElementsByTagName('body')[0];
+
+        let GR_popupContainer = document.createElement('div');
+        body.appendChild(GR_popupContainer);
+        GR_popupContainer.className = "GR-popup-container";
+        GR_popupContainer.addEventListener('click', (e) => {
+            if(e.target.className === "GR-popup-container") {
+                GR_popupContainer.remove();
+            }
+        });
+
+        let GR_popup = document.createElement('div');
+        GR_popupContainer.appendChild(GR_popup);
+        GR_popup.className = "GR-popup";
+
+        // header container
+        let headerContainer = document.createElement('div');
+        GR_popup.appendChild(headerContainer);
+        headerContainer.className = "header-container";
+            // report header
+            let reportHeader = document.createElement('h1');
+            headerContainer.appendChild(reportHeader);
+            reportHeader.innerText = 'Report';
+
+        // main-content container
+        let mainContentContainer = document.createElement('div');
+        GR_popup.appendChild(mainContentContainer);
+        mainContentContainer.className = "main-content-container";
+
+        let token = localStorage.getItem('token');
+
+        // get all relevant data from the database
+        axios.get('http://localhost:3000/expense-tracker/report', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        })
+        .then(userData => {
+            let arr = userData.data.arr;
+
+            let table = document.createElement('table');
+            mainContentContainer.appendChild(table);
+
+            // #1
+            let thead = document.createElement('thead');
+            table.appendChild(thead);
+
+            let tr_1 = document.createElement('tr');
+            thead.appendChild(tr_1);
+
+            let td_1 = document.createElement('td');
+            tr_1.appendChild(td_1);
+            td_1.innerText = "Date";
+
+            let td_2 = document.createElement('td');
+            tr_1.appendChild(td_2);
+            td_2.innerText = "Category";
+
+            let td_3 = document.createElement('td');
+            tr_1.appendChild(td_3);
+            td_3.innerText = "Expense";
+
+            // #2
+            let totalExpense = 0;
+            let tbody = document.createElement('tbody');
+            table.appendChild(tbody);
+            for(i of arr) {
+                let tr_2 = document.createElement('tr');
+                tbody.appendChild(tr_2);
+
+                let body_td_1 = document.createElement('td');
+                tr_2.appendChild(body_td_1);
+                body_td_1.innerText = i.date;
+
+                let body_td_2 = document.createElement('td');
+                tr_2.appendChild(body_td_2);
+                body_td_2.innerText = i.category;
+
+                let body_td_3 = document.createElement('td');
+                tr_2.appendChild(body_td_3);
+                body_td_3.innerText = "₹" + i.expense;
+                totalExpense += i.expense;
+            }
+
+            // #3
+            let tfoot = document.createElement('tfoot');
+            table.appendChild(tfoot);
+
+            let tr_3 = document.createElement('tr');
+            tfoot.appendChild(tr_3);
+
+            let foot_td_1 = document.createElement('td');
+            tr_3.appendChild(foot_td_1);
+            foot_td_1.innerText = "Total";
+            foot_td_1.colSpan = "2";
+
+            let foot_td_2 = document.createElement('td');
+            tr_3.appendChild(foot_td_2);
+            foot_td_2.innerText = "₹" + totalExpense;
+        })
+        .catch(err => console.error(err));
+    };
+    container.appendChild(generateReport);
+
     if(!isPremiumUser) {
-        //Buy Premium Membership
+        // Buy Premium Membership
         let premium = document.createElement('a');
         premium.innerText = '- Buy Premium Membership -';
         premium.id = 'premium';
@@ -685,6 +796,9 @@ function dailyExpense(username, isPremiumUser) {
         container.appendChild(premium);
     }
     else {
+        // Generate Report (contd.)
+        generateReport.style.top = '200px';
+
         // Dark Mode
         let darkMode_Button = document.createElement('button');
         darkMode_Button.innerText = 'Change Theme';

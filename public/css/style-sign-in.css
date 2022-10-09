@@ -46,7 +46,7 @@ header {
 
 #sign-into {
     left: 7.32%;
-    right: 72.25%;
+    /* right: 72.25%; */
     top: 20.05%;
     bottom: 67.84%;
     font-size: 62px;
@@ -56,7 +56,7 @@ header {
 #your-account {
     position: absolute;
     left: 7.32%;
-    right: 77.31%;
+    /* right: 77.31%; */
     top: 32.16%;
     bottom: 61.98%;
 

@@ -309,3 +309,38 @@ exports.getMyLeaderboard = (req, res, next) => {
 // #7 Iterate through the array and put in the correct 'name' with the help of the 'userId'
 
 // #8 send the array!
+
+exports.getMyReport = (req, res, next) => {
+    DailyExpense.findAll({
+        where: {
+            userId: req.userId
+        }
+    })
+    .then(userData => {
+        let arr = [];
+        
+        for(i of userData) {
+            let category = i.dataValues.category;
+            let amount = i.dataValues.amount;
+            let createdAt = i.dataValues.createdAt;
+
+            let date = createdAt.getDate() + '/' + (createdAt.getMonth()+1 < 10 ? '0' + (createdAt.getMonth()+1) : createdAt.getMonth()+1) + '/' + createdAt.getFullYear();
+
+            let obj = {
+                category : category,
+                expense : amount,
+                date : date
+            }
+
+            arr.push(obj);
+        }
+        
+        res.status(200).json({
+            arr : arr
+        });
+    })
+    .catch(err => {
+        console.log(err);
+        res.sendStatus(500); // Internal Server Error!
+    });
+}
