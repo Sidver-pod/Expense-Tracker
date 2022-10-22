@@ -13,6 +13,7 @@ const User = require('./models/user');
 const DailyExpense = require('./models/dailyExpense');
 const Order = require('./models/order');
 const ForgotPassword = require('./models/forgotPassword');
+const DownloadHistory = require('./models/downloadHistory');
 
 const cors = require('cors');
 
@@ -29,17 +30,21 @@ app.use('/expense-tracker', expenseTrackerRoute);
 app.use('/payment', paymentRoute);
 app.use('/password', passwordRoute);
 
-// One-Many association
+// #1 One-Many association
 User.hasMany(DailyExpense);
 DailyExpense.belongsTo(User);
 
-// One-One association
+// #2 One-Many association
 User.hasMany(Order);
 Order.belongsTo(User);
 
-// One-Many association
+// #3 One-Many association
 User.hasMany(ForgotPassword);
 ForgotPassword.belongsTo(User);
+
+// #4 One-Many association
+User.hasMany(DownloadHistory);
+DownloadHistory.belongsTo(User);
 
 sequelize.sync()
  .then(result => {

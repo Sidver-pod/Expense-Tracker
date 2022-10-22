@@ -262,7 +262,7 @@ input:focus {
     padding: 5px;
     cursor: pointer;
 }
-.GR-popup-container {
+.GR-popup-container, .GR-download-history-container {
     position: fixed;
     top: 0;
     right: 0;
@@ -276,7 +276,7 @@ input:focus {
     align-items: center;
     justify-content: center;
 }
-.GR-popup {
+.GR-popup, .GR-download-history-popup {
     height: 800px;
     /* width: 620 px; */
     background-color: #f6f6f6;
@@ -329,6 +329,58 @@ input:focus {
     text-align: right;
     text-transform: uppercase;
 }
+
+/* Report Footer */
+.footer-container {
+    display: flex;
+    justify-content:space-between;
+    align-items: center;
+    /* border: 1px solid rgba(229, 229, 229, 0.367);
+    background-color: rgba(229, 229, 229, 0.367); */
+    padding-top: 5px;
+    padding-right: 12px;
+    padding-bottom: 5px;
+    padding-left: 12px;
+    margin-top: 430px;
+}
+/* Download Button */
+.GR-download-button {
+    cursor: pointer;
+    width: 4rem;
+    height: 4rem;
+    border: 1px solid salmon;
+    border-radius: 40px;
+    font-size: xx-large;
+    margin-right: 3%;
+    background-color: salmon;
+    color: white;
+    transition-property: background-color;
+    transition-duration: 0.4s;
+    transition-timing-function: ease-in-out;
+}
+.GR-download-button:hover {
+    background-color: rgb(252, 107, 91);
+}
+/* Download History Button */
+.GR-download-history {
+    cursor: pointer;
+    width: 4rem;
+    height: 4rem;
+    border: 5px dashed rgb(147, 160, 158);
+    border-radius: 40px;
+    background-color: #EFEFEF;
+    font-size: xx-large;
+    margin-left: 3%;
+    color: white;
+    transition-property: border;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-in-out;
+}
+.GR-download-history:hover {
+    border: 1px dashed rgb(147, 160, 158);
+}
+/* Download History Container */
+
 
 #changeTheme {
     position: absolute;

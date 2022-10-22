@@ -784,6 +784,131 @@ function dailyExpense(username, isPremiumUser) {
             foot_td_2.innerText = "₹" + totalExpense;
         })
         .catch(err => console.error(err));
+
+        // footer container
+        let footerContainer = document.createElement('div');
+        GR_popup.appendChild(footerContainer);
+        footerContainer.className = "footer-container";
+            // download history button
+            let downloadHistory = document.createElement('button');
+            footerContainer.appendChild(downloadHistory);
+            downloadHistory.className = "GR-download-history";
+            downloadHistory.innerText = `👓`;
+            downloadHistory.addEventListener('click', (e) => {
+                // download history container
+                let downloadHistoryContainer = document.createElement('div');
+                GR_popup.appendChild(downloadHistoryContainer);
+                downloadHistoryContainer.className = "GR-download-history-container";
+                downloadHistoryContainer.addEventListener('click', (e) => {
+                    if(e.target.className === "GR-download-history-container") {
+                        downloadHistoryContainer.remove();
+                    }
+                });
+                    // download history popup
+                    let downloadHistoryPopup = document.createElement('div');
+                    downloadHistoryContainer.appendChild(downloadHistoryPopup);
+                    downloadHistoryPopup.className = "GR-download-history-popup";
+                        // header container
+                        let downloadHistory_headerContainer = document.createElement('div');
+                        downloadHistoryPopup.appendChild(downloadHistory_headerContainer);
+                        downloadHistory_headerContainer.className = "header-container";
+                            // download history header
+                            let downloadHistory_Header = document.createElement('h1');
+                            downloadHistory_headerContainer.appendChild(downloadHistory_Header);
+                            downloadHistory_Header.innerText = 'Download History';
+                
+                        // main-content container
+                        let downloadHistory_mainContentContainer = document.createElement('div');
+                        downloadHistoryPopup.appendChild(downloadHistory_mainContentContainer);
+                        downloadHistory_mainContentContainer.className = "main-content-container";
+
+                let token = localStorage.getItem('token');
+                axios.get('http://localhost:3000/expense-tracker/report/history', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                })
+                .then(result => {
+                    let arr = result.data.history;
+
+                    let table = document.createElement('table');
+                    downloadHistory_mainContentContainer.appendChild(table);
+        
+                    // #1
+                    let thead = document.createElement('thead');
+                    table.appendChild(thead);
+        
+                    let tr_1 = document.createElement('tr');
+                    thead.appendChild(tr_1);
+        
+                    let td_1 = document.createElement('td');
+                    tr_1.appendChild(td_1);
+                    td_1.innerText = "S.No.";
+        
+                    let td_2 = document.createElement('td');
+                    tr_1.appendChild(td_2);
+                    td_2.innerText = "Date";
+        
+                    let td_3 = document.createElement('td');
+                    tr_1.appendChild(td_3);
+                    td_3.innerText = "Download Link";
+        
+                    // #2
+                    let tbody = document.createElement('tbody');
+                    table.appendChild(tbody);
+                    for(let i=0; i<arr.length; i++) {
+                        let tr_2 = document.createElement('tr');
+                        tbody.appendChild(tr_2);
+        
+                        let body_td_1 = document.createElement('td');
+                        tr_2.appendChild(body_td_1);
+                        body_td_1.innerText = i+1;
+        
+                        let body_td_2 = document.createElement('td');
+                        tr_2.appendChild(body_td_2);
+                        body_td_2.innerText = arr[i].createdAt;
+        
+                        let body_td_3 = document.createElement('td');
+                        tr_2.appendChild(body_td_3);
+                            let downloadLink = document.createElement('a');
+                            body_td_3.appendChild(downloadLink);
+                            downloadLink.className = "download-link";
+                            downloadLink.innerText = "⬇";
+                            downloadLink.href = `${arr[i].url}`;
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error! Please refresh the page.');
+                });
+            });
+
+            // download button
+            let downloadButton = document.createElement('button');
+            footerContainer.appendChild(downloadButton);
+            downloadButton.className = "GR-download-button";
+            downloadButton.innerText = `⬇`;
+            downloadButton.addEventListener('click', (e) => {
+                let token = localStorage.getItem('token');
+                // the backend talks to Amazon S3 and uploads the user data in a file format; Amazon S3 sends back the URL of the respective file to the backend as a response; the backend then sends back a response to the frontend containing the URL of the file; the URL is then put into an 'a' tag and is made to open which then leads to the browser downloading the file indirectly into the user's computer memory!
+                axios.get('http://localhost:3000/expense-tracker/report/download', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                })
+                .then(result => {
+                    console.log(result.data.fileURL);
+                    let fileURL = result.data.fileURL;
+                    let a = document.createElement('a');
+                    a.href = fileURL;
+                    a.download = "Daily Expense Report.txt"; // renaming the file being downloaded
+                    a.click();
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error! Please refresh the page.');
+                });
+            });
     };
     container.appendChild(generateReport);
 

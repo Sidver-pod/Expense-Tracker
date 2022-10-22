@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const DailyExpense = require('../models/dailyExpense');
+const DownloadHistory = require('../models/downloadHistory');
 
 /* helps secure the User password by encrypting (salting + hashing) */
 const bcrypt = require('bcrypt');
@@ -7,6 +8,12 @@ const saltRounds = 10;
 
 /* helps the User remain logged in */
 const jwt = require('jsonwebtoken');
+
+/*
+    #1 helps to connect with Amazon S3 for donwloading the generated report
+    #2 imported from the 'services' folder
+*/
+const AWS_S3_service = require('../services/AWS-S3-service');
 
 function generateAccessToken(userId) {
     return jwt.sign(userId, process.env.TOKEN_SECRET);
@@ -117,13 +124,11 @@ exports.postLogin = (req, res, next) => {
 };
 
 exports.postTrackExpense = (req, res, next) => {
-    let userId = req.userId;
     let category = req.body.track.category;
     let expense = req.body.track.expense;
     let description = req.body.track.description;
 
-    DailyExpense.create({
-        userId: userId,
+    req.user.createDailyExpense({
         category: category,
         amount: expense,
         description: description
@@ -310,7 +315,9 @@ exports.getMyLeaderboard = (req, res, next) => {
 
 // #8 send the array!
 
-exports.getMyReport = (req, res, next) => {
+let getMyReport;
+let report; // for 'downloadMyReport'
+exports.getMyReport = getMyReport = (req, res, next) => {
     DailyExpense.findAll({
         where: {
             userId: req.userId
@@ -334,6 +341,8 @@ exports.getMyReport = (req, res, next) => {
 
             arr.push(obj);
         }
+
+        report = arr; // for 'downloadMyReport'
         
         res.status(200).json({
             arr : arr
@@ -342,5 +351,57 @@ exports.getMyReport = (req, res, next) => {
     .catch(err => {
         console.log(err);
         res.sendStatus(500); // Internal Server Error!
+    });
+}
+
+exports.downloadMyReport = async (req, res, next) => {
+    try {
+        await req.userId.getMyReport; // helps assign user data to the variable 'report'
+
+        // client error!
+        if(report === undefined) {
+            return res.status(400).json({fileURL: undefined, success: false, error: 'Client Error'}); // Bad Request
+        }
+
+        console.log(report);
+
+        let obj = {
+            data: report
+        }
+
+        let stringifiedData = JSON.stringify(obj);
+
+        console.log(stringifiedData);
+        
+        let fileName = `Daily Expense Report ${req.userId}/${new Date()}.txt`; // doing so eliminates the problem of overwriting the same file in Amazon S3!
+    
+        let fileURL = await AWS_S3_service.uploadToS3(stringifiedData, fileName);
+        
+        // saving the 'fileURL' in 'downloadHistory' table
+        req.user.createDownloadHistory({
+            url: fileURL
+        });
+
+        return res.status(200).json({fileURL: fileURL, success: true});
+    }
+    catch(err) {
+        console.log('Something went wrong!', err);
+        return res.status(500).json({fileURL: '', success: false, error: err}); // Internal Server Error!
+    }
+}
+
+exports.getDownloadHistory = (req, res, next) => {
+    DownloadHistory.findAll({
+        where: {
+            userId: req.userId
+        }
+    })
+    .then(userDownloadHistory => {
+        console.log(userDownloadHistory);
+        res.status(200).json({history: userDownloadHistory});
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({error: err});
     });
 }

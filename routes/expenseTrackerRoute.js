@@ -1,6 +1,7 @@
 const express = require('express');
 
 const jwt = require('jsonwebtoken');
+const User = require('../models/user');
 
 const router = express.Router();
 
@@ -14,6 +15,8 @@ router.get('/my-expense', authenticateToken, expenseTrackerController.getMyExpen
 router.post('/my-expense/delete', authenticateToken, expenseTrackerController.deleteMyExpense);
 router.get('/my-leaderboard', authenticateToken, expenseTrackerController.getMyLeaderboard);
 router.get('/report', authenticateToken, expenseTrackerController.getMyReport);
+router.get('/report/download', authenticateToken, expenseTrackerController.downloadMyReport);
+router.get('/report/history', authenticateToken, expenseTrackerController.getDownloadHistory);
 
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
@@ -26,7 +29,15 @@ function authenticateToken(req, res, next) {
 
         req.userId = userId.id;
         
-        next();
+        User.findByPk(req.userId)
+        .then(user => {
+            req.user = user;
+            next();
+        })
+        .catch(err => {
+            console.error(err);
+            res.sendStatus('500'); // server error!
+        });
     });
 }
 
