@@ -90,7 +90,7 @@ input:focus {
     left: 7.32%;
     font-size: smaller;
     color: #F35D5D;
-    width: fit-content;
+    width: max-content;
 }
 #error-phoneNo {
     top: 52.53%;

@@ -8,10 +8,6 @@ const Order = sequelize.define('order', {
         allowNull: false,
         primaryKey: true
     },
-    userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
     razorpay_payment_id: DataTypes.STRING,
     razorpay_order_id: DataTypes.STRING,
     status: DataTypes.STRING

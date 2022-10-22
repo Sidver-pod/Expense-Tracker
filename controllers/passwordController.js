@@ -13,11 +13,10 @@ exports.forgotPassword = (req, res, next) => {
             email: emailAddress
         }
     })
-    .then(result => {
-        if(result) {
-            return ForgotPassword.create({
-                isActive: true,
-                userId: result.dataValues.id
+    .then(user => {
+        if(user) {
+            return user.createForgotPassword({
+                isActive: true
             });
         }
         else res.sendStatus(404); // invalid email; does not exist in the database!
