@@ -96,7 +96,11 @@ function viewExpense(e) {
     let userId = e.target.id;
     let token = localStorage.getItem('token');
 
-    axios.get('http://localhost:3000/expense-tracker/my-expense', {
+    // '-1' allows the backend logic to send the whole 'Daily Expense' for the user
+    axios.post('http://localhost:3000/expense-tracker/my-expense', {
+        currentPageNumber: -1
+    },
+    {
         headers: {
             'Authorization': 'Bearer ' + token,
             'userid': userId
@@ -374,20 +378,31 @@ function getLeaderboardInfo() {
     });
 }
 
+// Getting user-expenses to fill into the expense-table
 function getUserInfo_II() {
     return new Promise((resolve, reject) => {
         let token = localStorage.getItem('token');
+        let currentPageNumber = 1;
 
         // checking if token exists; then validating the token if it complies with the secret key in the backend
         if(token !== null) {
-            axios.get(`http://localhost:3000/expense-tracker/my-expense`, {
+            axios.post(`http://localhost:3000/expense-tracker/my-expense`, {
+                currentPageNumber: currentPageNumber
+            },
+            {
                 headers: {
                     'Authorization': 'Bearer ' + token
                 }
             })
             .then(result => {
                 let user_data = result.data.user_data;
-                resolve(user_data);
+                let totalExpenses = result.data.totalExpenses;
+                let EXPENSES_PER_PAGE = result.data.EXPENSES_PER_PAGE;
+                resolve({
+                    user_data: user_data,
+                    totalExpenses: totalExpenses,
+                    EXPENSES_PER_PAGE: EXPENSES_PER_PAGE
+                });
             })
             .catch(err => {
                 reject(err);
@@ -540,8 +555,101 @@ function myExpenses(e) {
         let tbody = document.createElement('tbody');
         table.appendChild(tbody);
 
+        // Buttons for Pagination
+        let pageButtonsContainer = document.createElement('div');
+        newDiv2.appendChild(pageButtonsContainer);
+        pageButtonsContainer.className = "pageButtons-container";
+
+        // Getting user-expenses to fill into the expense-table (also helps with Pagination)
         getUserInfo_II()
-        .then(user_data => {
+        .then(data => {
+            let user_data = data.user_data;
+            let totalExpenses = data.totalExpenses;
+            let EXPENSES_PER_PAGE = data.EXPENSES_PER_PAGE;
+
+            /* making page buttons */
+            let numberOfPages = Math.ceil(totalExpenses/EXPENSES_PER_PAGE);
+            for(let i=0; i<numberOfPages; i++) {
+                let pageButton = document.createElement('button');
+                pageButtonsContainer.appendChild(pageButton);
+                pageButton.innerText = i+1;
+                pageButton.className = "pageButton";
+
+                // pageButton '1' by default will be active
+                if(i+1 == 1) {
+                    pageButton.classList.add("pageButton-active");
+                }
+            }
+
+            // capturing page button 'click' event through 'Event Bubbling'!
+            newDiv2.addEventListener('click', (e) => {
+                if(e.target.classList.contains('pageButton')) {
+                    let pageButtons = document.getElementsByClassName('pageButtons-container')[0].children;
+
+                    // removing the previously 'active' page button
+                    for(i of pageButtons) {
+                        if(i.classList.contains('pageButton-active')) {
+                            i.classList.remove("pageButton-active");
+                        }
+                    }
+
+                    // making current button 'active'
+                    e.target.classList.add('pageButton-active');
+
+                    /* getting the next set of Expenses with respect to the page button that got clicked! */
+                    let token = localStorage.getItem('token');
+                    let currentPageNumber = e.target.innerText;
+
+                    if(token !== null) {
+                        axios.post(`http://localhost:3000/expense-tracker/my-expense`, {
+                            currentPageNumber: currentPageNumber
+                        },
+                        {
+                            headers: {
+                                'Authorization': 'Bearer ' + token
+                            }
+                        })
+                        .then(result => {
+                            let user_data = result.data.user_data; console.log(user_data);
+                            let totalExpenses = result.data.totalExpenses;
+                            let EXPENSES_PER_PAGE = result.data.EXPENSES_PER_PAGE;
+
+                            let dataLength = user_data.length;
+
+                            let table = document.getElementsByClassName('expense-table')[0];
+                            let tbody = table.children[1];
+                            let tr_arr = tbody.children;
+
+                            for(let i=0; i<EXPENSES_PER_PAGE; i++) {
+                                let td_arr = tr_arr[i].children;
+
+                                // renaming the 'td' already existing
+                                if(dataLength != 0) {
+                                    dataLength--;
+                                    td_arr[0].innerText = ((currentPageNumber - 1) * EXPENSES_PER_PAGE) + (i+1); // S.No.
+                                    td_arr[1].innerText = user_data[i].category; // Category
+                                    td_arr[2].innerText = user_data[i].amount; // Expense Amount
+                                    td_arr[3].innerText = user_data[i].description; // Description
+                                    td_arr[4].children[0].innerText = "delete"; // Option — (i)
+                                    td_arr[4].children[0].id = user_data[i].id; // Option — (ii)
+                                }
+                                // cleaning out the rest of the 'td'
+                                else {
+                                    td_arr[0].innerText = ""; // S.No.
+                                    td_arr[1].innerText = ""; // Category
+                                    td_arr[2].innerText = ""; // Expense Amount
+                                    td_arr[3].innerText = ""; // Description
+                                    td_arr[4].children[0].innerText = ""; // Option
+                                }
+                            }
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        });
+                    }
+                }
+            });
+
             for(let i=0; i<user_data.length; i++) {
                 let tr = document.createElement('tr');
                 tbody.appendChild(tr);
@@ -722,6 +830,24 @@ function dailyExpense(username, isPremiumUser) {
         })
         .then(userData => {
             let arr = userData.data.arr;
+            let myMap = new Map(); // new hashtable
+
+            for(i of arr) {
+                if(myMap.get(i.category)) {
+                    let oldExpense = myMap.get(i.category).expense;
+                    let newExpense = oldExpense + i.expense;
+                    let newData = {
+                        category: i.category,
+                        expense: newExpense,
+                        date: myMap.get(i.category).date
+                    }
+                    myMap.set(i.category, newData); // replacing old data with new
+                }
+                else {
+                    // creating a new 'key : value' in hashtable
+                    myMap.set(i.category, i);
+                }
+            }
 
             let table = document.createElement('table');
             mainContentContainer.appendChild(table);
@@ -749,22 +875,22 @@ function dailyExpense(username, isPremiumUser) {
             let totalExpense = 0;
             let tbody = document.createElement('tbody');
             table.appendChild(tbody);
-            for(i of arr) {
+            for(i of myMap) {
                 let tr_2 = document.createElement('tr');
                 tbody.appendChild(tr_2);
 
                 let body_td_1 = document.createElement('td');
                 tr_2.appendChild(body_td_1);
-                body_td_1.innerText = i.date;
+                body_td_1.innerText = i[1].date;
 
                 let body_td_2 = document.createElement('td');
                 tr_2.appendChild(body_td_2);
-                body_td_2.innerText = i.category;
+                body_td_2.innerText = i[1].category;
 
                 let body_td_3 = document.createElement('td');
                 tr_2.appendChild(body_td_3);
-                body_td_3.innerText = "₹" + i.expense;
-                totalExpense += i.expense;
+                body_td_3.innerText = "₹" + i[1].expense;
+                totalExpense += i[1].expense;
             }
 
             // #3

@@ -277,13 +277,12 @@ input:focus {
     justify-content: center;
 }
 .GR-popup, .GR-download-history-popup {
-    height: 800px;
-    /* width: 620 px; */
     background-color: #f6f6f6;
     width: 21cm;
-    /* height: 29.7cm; */
+    height: 800px;
     margin: 30mm 45mm 30mm 45mm;
     font-size: 16px;
+    overflow: auto;
 }
 
 .header-container {
@@ -339,7 +338,7 @@ input:focus {
     background-color: rgba(229, 229, 229, 0.367); */
     padding-top: 5px;
     padding-right: 12px;
-    padding-bottom: 5px;
+    padding-bottom: 35px;
     padding-left: 12px;
     margin-top: 430px;
 }
@@ -379,8 +378,6 @@ input:focus {
 .GR-download-history:hover {
     border: 1px dashed rgb(147, 160, 158);
 }
-/* Download History Container */
-
 
 #changeTheme {
     position: absolute;
@@ -435,6 +432,13 @@ input:focus {
     overflow-y: auto;
     max-height: min-content;
     min-width: min-content;
+}
+#newDiv2 {
+    align-items: center;
+    flex-direction: column;
+    /* border: 3px solid purple; */
+    height: 600px;
+    margin-top: 5%;
 }
 #daily-expense-form {
     position: absolute;
@@ -545,14 +549,16 @@ input[type=number] {
 
 .expense-table {
     /* position: absolute; */
-    margin-top: 15%;
+    margin-top: 8%;
     border-collapse: collapse;
     width: 50em;
+    height: 325.5px;
     border-radius: 6px;
     /* box-shadow: 0px 10px 30px 5px rgba(0, 0, 0, .15); */
     /* margin: 25px auto; */
     min-height: min-content;
     min-width: fit-content;
+    /* border: 1px solid magenta; */
 }
 .expense-table thead tr {
     border-top: 1px dashed black;
@@ -576,6 +582,33 @@ input[type=number] {
 }
 .expense-table tbody tr td a:hover {
     color: #F35D5D;
+}
+
+/* Page Buttons (for Pagination) */
+.pageButtons-container {
+    display: flex;
+    flex-direction: row;
+    margin-top: 5%;
+    /* border: 1px solid gold; */
+}
+.pageButton {
+    cursor: pointer;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid buttonborder;
+    border-radius: 5px;
+    /* font-size: xx-large; */
+    margin-right: 3%;
+    /* background-color: salmon; */
+    /* color: white; */
+
+    /* transition-property: background-color;
+    transition-duration: 0.4s;
+    transition-timing-function: ease-in-out; */
+}
+.pageButton-active {
+    background-color: salmon;
+    border: 1px solid salmon;
 }
 
 /* Leaderboard Table */

@@ -11,7 +11,7 @@ router.post('/sign-in', expenseTrackerController.postSignIn);
 router.post('/login', expenseTrackerController.postLogin);
 router.post('/track-expense', authenticateToken, expenseTrackerController.postTrackExpense);
 router.get('/track-expense', authenticateToken, expenseTrackerController.getTrackExpense);
-router.get('/my-expense', authenticateToken, expenseTrackerController.getMyExpense);
+router.post('/my-expense', authenticateToken, expenseTrackerController.getMyExpense);
 router.post('/my-expense/delete', authenticateToken, expenseTrackerController.deleteMyExpense);
 router.get('/my-leaderboard', authenticateToken, expenseTrackerController.getMyLeaderboard);
 router.get('/report', authenticateToken, expenseTrackerController.getMyReport);

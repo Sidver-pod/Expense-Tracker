@@ -15,6 +15,8 @@ const jwt = require('jsonwebtoken');
 */
 const AWS_S3_service = require('../services/AWS-S3-service');
 
+const EXPENSES_PER_PAGE = 7;
+
 function generateAccessToken(userId) {
     return jwt.sign(userId, process.env.TOKEN_SECRET);
 }
@@ -177,22 +179,48 @@ exports.getTrackExpense = (req, res, next) => {
 
 exports.getMyExpense = (req, res, next) => {
     let userId = req.userId;
+    let currentPageNumber = req.body.currentPageNumber;
+    let totalExpenses;
 
     if(req.headers['userid']) {
         userId = req.headers['userid'];
     }
 
-    DailyExpense.findAll({
+    DailyExpense.count({
         where: {
             userId: userId
+        }
+    })
+    .then(numOfExpenses => {
+        totalExpenses = numOfExpenses;
+
+        // for 'view-expense-graph'
+        if(currentPageNumber === -1) {
+            return DailyExpense.findAll({
+                where: {
+                    userId: userId
+                }
+            });
+        }
+        // for Pagination of all the expenses
+        else {
+            return DailyExpense.findAll({
+                where: {
+                    userId: userId
+                },
+                offset: (currentPageNumber - 1) * EXPENSES_PER_PAGE,
+                limit: EXPENSES_PER_PAGE
+            })
         }
     })
     .then(user_expense => {
         if(user_expense.length) {
             let user_data = user_expense;
-
+            
             res.status(200).json({
-                'user_data': user_data
+                'user_data': user_data,
+                'totalExpenses': totalExpenses,
+                'EXPENSES_PER_PAGE': EXPENSES_PER_PAGE
             });
         }
         else {
@@ -363,15 +391,36 @@ exports.downloadMyReport = async (req, res, next) => {
             return res.status(400).json({fileURL: undefined, success: false, error: 'Client Error'}); // Bad Request
         }
 
-        console.log(report);
+        let myMap = new Map(); // new hashtable
+
+        // storing data uniquely in hashtable according to 'category' thus allowing to sum up expenses w.r.t. category
+        for(i of report) {
+            if(myMap.get(i.category)) {
+                let oldExpense = myMap.get(i.category).expense;
+                let newExpense = oldExpense + i.expense;
+                let newData = {
+                    category: i.category,
+                    expense: newExpense,
+                    date: myMap.get(i.category).date
+                }
+                myMap.set(i.category, newData); // replacing old data with new
+            }
+            else {
+                // creating a new 'key : value' in hashtable
+                myMap.set(i.category, i);
+            }
+        }
+
+        let newReport = [];
+        for(i of myMap) {
+            newReport.push(i[1]);
+        }
 
         let obj = {
-            data: report
+            data: newReport
         }
 
         let stringifiedData = JSON.stringify(obj);
-
-        console.log(stringifiedData);
         
         let fileName = `Daily Expense Report ${req.userId}/${new Date()}.txt`; // doing so eliminates the problem of overwriting the same file in Amazon S3!
     
