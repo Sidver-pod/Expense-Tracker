@@ -15,7 +15,7 @@ const jwt = require('jsonwebtoken');
 */
 const AWS_S3_service = require('../services/AWS-S3-service');
 
-const EXPENSES_PER_PAGE = 7;
+let EXPENSES_PER_PAGE = 7; // default value
 
 function generateAccessToken(userId) {
     return jwt.sign(userId, process.env.TOKEN_SECRET);
@@ -180,8 +180,16 @@ exports.getTrackExpense = (req, res, next) => {
 exports.getMyExpense = (req, res, next) => {
     let userId = req.userId;
     let currentPageNumber = req.body.currentPageNumber;
+    let rowsPerPage = parseInt(req.body.rowsPerPage);
     let totalExpenses;
 
+    // Dynamic Pagination
+    if(rowsPerPage) {
+        EXPENSES_PER_PAGE = rowsPerPage;
+    }
+    else EXPENSES_PER_PAGE = 7; // resetting to default value!
+
+    // for Leaderboard ('view expense graph')
     if(req.headers['userid']) {
         userId = req.headers['userid'];
     }

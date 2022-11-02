@@ -383,11 +383,13 @@ function getUserInfo_II() {
     return new Promise((resolve, reject) => {
         let token = localStorage.getItem('token');
         let currentPageNumber = 1;
+        let rowsPerPage = localStorage.getItem('rowsPerPage'); // Dynamic Pagination
 
         // checking if token exists; then validating the token if it complies with the secret key in the backend
         if(token !== null) {
             axios.post(`http://localhost:3000/expense-tracker/my-expense`, {
-                currentPageNumber: currentPageNumber
+                currentPageNumber: currentPageNumber,
+                rowsPerPage: rowsPerPage
             },
             {
                 headers: {
@@ -527,6 +529,78 @@ function myExpenses(e) {
         // thead
         let thead = document.createElement('thead');
         table.appendChild(thead);
+            /* Dynamic Pagination — 'rows per page' — another tr for 'thead' */
+            let tr_rowsPerPage = document.createElement('tr');
+            thead.appendChild(tr_rowsPerPage);
+            tr_rowsPerPage.className = "rows-per-page-tr";
+                // td for 'tr_rowsPerPage'
+                let td_rowsPerPage = document.createElement('td');
+                tr_rowsPerPage.appendChild(td_rowsPerPage);
+                td_rowsPerPage.colSpan = 1;
+                td_rowsPerPage.className = "rows-per-page-td";
+                    /* label and select */
+                    // #1
+                    let label_rPP = document.createElement('label');
+                    td_rowsPerPage.appendChild(label_rPP);
+                    label_rPP.htmlFor = "rows-per-page";
+                    label_rPP.innerText = "rows per page: ";
+                    // #2
+                    let select_rPP = document.createElement('select');
+                    td_rowsPerPage.appendChild(select_rPP);
+                    select_rPP.id = "rows-per-page";
+                    // when user selects a different value from the options available
+                    select_rPP.onchange = (e) => {
+                        let options = e.target.children;
+
+                        // finding and storing the new selected value in 'localStorage'!
+                        for(i of options) {
+                            if(i.selected) {
+                                localStorage.setItem('rowsPerPage', i.value);
+                            }
+                        }
+
+                        alert('Changes will be visible once the page reloads.');
+                        location.reload(); // refreshing the page!
+                    }
+                        /* option */
+                        // #0
+                        let option_0_rpp = document.createElement('option');
+                        select_rPP.appendChild(option_0_rpp);
+                        option_0_rpp.value = "7";
+                        option_0_rpp.innerText = "7";
+                        // #1
+                        let option_1_rpp = document.createElement('option');
+                        select_rPP.appendChild(option_1_rpp);
+                        option_1_rpp.value = "10";
+                        option_1_rpp.innerText = "10";
+                        // #2
+                        let option_2_rpp = document.createElement('option');
+                        select_rPP.appendChild(option_2_rpp);
+                        option_2_rpp.value = "25";
+                        option_2_rpp.innerText = "25";
+                        // #3
+                        let option_3_rpp = document.createElement('option');
+                        select_rPP.appendChild(option_3_rpp);
+                        option_3_rpp.value = "50";
+                        option_3_rpp.innerText = "50";
+
+                        // logic to add 'selected' to show which option is currently in use (from 'localStorage')
+                        if(localStorage.getItem("rowsPerPage")) {
+                            let rPP = localStorage.getItem("rowsPerPage");
+                            if(rPP == 7) {
+                                option_0_rpp.selected = true;
+                            }
+                            else if(rPP == 10) {
+                                option_1_rpp.selected = true
+                            }
+                            else if(rPP == 25) {
+                                option_2_rpp.selected = true
+                            }
+                            else if(rPP == 50) {
+                                option_3_rpp.selected = true
+                            }
+                        }
+
             // tr for 'thead'
             let tr_thead = document.createElement('tr');
             thead.appendChild(tr_thead);
@@ -560,7 +634,7 @@ function myExpenses(e) {
         newDiv2.appendChild(pageButtonsContainer);
         pageButtonsContainer.className = "pageButtons-container";
 
-        // Getting user-expenses to fill into the expense-table (also helps with Pagination)
+        // Getting user-expenses to fill into the expense-table (also helps with Pagination & Dynamic Pagination)
         getUserInfo_II()
         .then(data => {
             let user_data = data.user_data;
@@ -599,10 +673,12 @@ function myExpenses(e) {
                     /* getting the next set of Expenses with respect to the page button that got clicked! */
                     let token = localStorage.getItem('token');
                     let currentPageNumber = e.target.innerText;
+                    let rowsPerPage = localStorage.getItem('rowsPerPage'); // Dynamic Pagination
 
                     if(token !== null) {
                         axios.post(`http://localhost:3000/expense-tracker/my-expense`, {
-                            currentPageNumber: currentPageNumber
+                            currentPageNumber: currentPageNumber,
+                            rowsPerPage: rowsPerPage
                         },
                         {
                             headers: {
@@ -1087,7 +1163,10 @@ function dailyExpense(username, isPremiumUser) {
                 containerChangeTheme.classList.add('dark');
                 Hi.classList.add('Hi_dark');
                 for(let i=0; i<labelTag.length; i++) {
-                    labelTag[i].classList.add('label_dark');
+                    let condition = (labelTag[i].htmlFor == "rows-per-page"); // preventing 'dark mode' on 'rows-per-page' label
+
+                    if(!condition)
+                        labelTag[i].classList.add('label_dark');
                 }
                 if(expenseTable) {
                     expenseTable.classList.add('expense-table-dark');
