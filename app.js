@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 
 const bodyParser = require('body-parser');
 
@@ -7,6 +8,9 @@ const express = require('express');
 require('dotenv').config();
 
 const sequelize = require('./util/database');
+
+const helmet = require('helmet'); // helps provide secure response headers
+const morgan = require('morgan'); // helps log requests, responses and errors
 
 //database models
 const User = require('./models/user');
@@ -23,8 +27,16 @@ const expenseTrackerRoute = require('./routes/expenseTrackerRoute');
 const paymentRoute = require('./routes/paymentRoute');
 const passwordRoute = require('./routes/passwordRoute');
 
+// creating a file 'access.log' for storing all the logs
+const accessLogStream = fs.createWriteStream(
+    path.join(__dirname, 'access.log'),
+    { flags: 'a' } // appends 'new log' to 'existing log' instead of overwriting! 
+);
+
 app.use(bodyParser.json());
 app.use(cors());
+app.use(helmet()); // helps provide secure response headers
+app.use(morgan('combined', { stream: accessLogStream })); // helps log requests, responses and errors
 
 app.use('/expense-tracker', expenseTrackerRoute);
 app.use('/payment', paymentRoute);
@@ -49,6 +61,6 @@ DownloadHistory.belongsTo(User);
 sequelize.sync()
  .then(result => {
      console.log('database sync: CHECK');
-     app.listen('3000');
+     app.listen(process.env.PORT || 3000);
  })
  .catch(err => console.error(err));

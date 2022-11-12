@@ -27,3 +27,7 @@
 - **uuid** `npm i uuid` *(or make use of the in-built UUID data type in Sequelize directly for defining the data type; I did the one in parentheses!)*
 
 - **aws-sdk** `npm i aws-sdk`
+
+- **Helmet** `npm install helmet --save`
+
+- **morgan** `npm install morgan --save`
