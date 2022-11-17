@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
 
 function checkPassword(emailAddress) {
     return new Promise((resolve, reject) => {
-        axios.post('http://localhost:3000/password/forgot', {
+        axios.post('https://localhost:3000/password/forgot', {
             'emailAddress': emailAddress
         })
         .then(result => {
@@ -97,7 +97,7 @@ function viewExpense(e) {
     let token = localStorage.getItem('token');
 
     // '-1' allows the backend logic to send the whole 'Daily Expense' for the user
-    axios.post('http://localhost:3000/expense-tracker/my-expense', {
+    axios.post('https://localhost:3000/expense-tracker/my-expense', {
         currentPageNumber: -1
     },
     {
@@ -330,7 +330,7 @@ function deleteMyExpense(e) {
     let id = e.target.id;
     let token = localStorage.getItem('token');
 
-    axios.post('http://localhost:3000/expense-tracker/my-expense/delete', {
+    axios.post('https://localhost:3000/expense-tracker/my-expense/delete', {
         'id': id
     },
     {
@@ -357,7 +357,7 @@ function getLeaderboardInfo() {
         let token = localStorage.getItem('token');
 
         if(token !== null) {
-            axios.get('http://localhost:3000/expense-tracker/my-leaderboard', {
+            axios.get('https://localhost:3000/expense-tracker/my-leaderboard', {
                 headers: {
                     'Authorization': 'Bearer ' + token
                 }
@@ -387,7 +387,7 @@ function getUserInfo_II() {
 
         // checking if token exists; then validating the token if it complies with the secret key in the backend
         if(token !== null) {
-            axios.post(`http://localhost:3000/expense-tracker/my-expense`, {
+            axios.post(`https://localhost:3000/expense-tracker/my-expense`, {
                 currentPageNumber: currentPageNumber,
                 rowsPerPage: rowsPerPage
             },
@@ -424,7 +424,7 @@ function getUserInfo() {
 
     // checking if token exists; then validating the token if it complies with the secret key in the backend
     if(token !== null) {
-        axios.get(`http://localhost:3000/expense-tracker/track-expense`, {
+        axios.get(`https://localhost:3000/expense-tracker/track-expense`, {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
@@ -456,7 +456,7 @@ function login(e) {
     let email = document.getElementById('email');
     let password = document.getElementById('password');
 
-    axios.post('http://localhost:3000/expense-tracker/login', {
+    axios.post('https://localhost:3000/expense-tracker/login', {
         email: email.value,
         password: password.value
     })
@@ -676,7 +676,7 @@ function myExpenses(e) {
                     let rowsPerPage = localStorage.getItem('rowsPerPage'); // Dynamic Pagination
 
                     if(token !== null) {
-                        axios.post(`http://localhost:3000/expense-tracker/my-expense`, {
+                        axios.post(`https://localhost:3000/expense-tracker/my-expense`, {
                             currentPageNumber: currentPageNumber,
                             rowsPerPage: rowsPerPage
                         },
@@ -793,7 +793,7 @@ function track(e) {
     let expense = document.getElementById('expense');
     let description = document.getElementById('description');
 
-    axios.post('http://localhost:3000/expense-tracker/track-expense', {
+    axios.post('https://localhost:3000/expense-tracker/track-expense', {
         'track': {
             'category': category.value,
             'expense': expense.value,
@@ -899,7 +899,7 @@ function dailyExpense(username, isPremiumUser) {
         let token = localStorage.getItem('token');
 
         // get all relevant data from the database
-        axios.get('http://localhost:3000/expense-tracker/report', {
+        axios.get('https://localhost:3000/expense-tracker/report', {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
@@ -1025,7 +1025,7 @@ function dailyExpense(username, isPremiumUser) {
                         downloadHistory_mainContentContainer.className = "main-content-container";
 
                 let token = localStorage.getItem('token');
-                axios.get('http://localhost:3000/expense-tracker/report/history', {
+                axios.get('https://localhost:3000/expense-tracker/report/history', {
                     headers: {
                         'Authorization': 'Bearer ' + token
                     }
@@ -1093,7 +1093,7 @@ function dailyExpense(username, isPremiumUser) {
             downloadButton.addEventListener('click', (e) => {
                 let token = localStorage.getItem('token');
                 // the backend talks to Amazon S3 and uploads the user data in a file format; Amazon S3 sends back the URL of the respective file to the backend as a response; the backend then sends back a response to the frontend containing the URL of the file; the URL is then put into an 'a' tag and is made to open which then leads to the browser downloading the file indirectly into the user's computer memory!
-                axios.get('http://localhost:3000/expense-tracker/report/download', {
+                axios.get('https://localhost:3000/expense-tracker/report/download', {
                     headers: {
                         'Authorization': 'Bearer ' + token
                     }

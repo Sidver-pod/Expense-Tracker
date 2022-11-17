@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const https = require('https'); // for SSL/TLS (OpenSSL)
 
 const bodyParser = require('body-parser');
 
@@ -33,6 +34,10 @@ const accessLogStream = fs.createWriteStream(
     { flags: 'a' } // appends 'new log' to 'existing log' instead of overwriting! 
 );
 
+// SSL/TLS (OpenSSL); helps encrypt data being shared between Server and Client!!
+const privateKey = fs.readFileSync('server.key');
+const certificate = fs.readFileSync('server.cert'); // public key + server identity
+
 app.use(bodyParser.json());
 app.use(cors());
 app.use(helmet()); // helps provide secure response headers
@@ -61,6 +66,7 @@ DownloadHistory.belongsTo(User);
 sequelize.sync()
  .then(result => {
      console.log('database sync: CHECK');
-     app.listen(process.env.PORT || 3000);
+     // provides 'https' in the URL, thereby allowing to send a 'certificate' to the client!
+     https.createServer({ key: privateKey, cert: certificate }, app).listen(process.env.PORT || 3000);
  })
  .catch(err => console.error(err));

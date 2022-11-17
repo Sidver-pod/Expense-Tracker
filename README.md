@@ -31,3 +31,5 @@
 - **Helmet** `npm install helmet --save`
 
 - **morgan** `npm install morgan --save`
+
+- **OpenSSL** `openssl req -nodes -new -x509 -keyout server.key -out server.cert` *(command for creating a certificate; helps encrypt data being shared between Server and Client)*
