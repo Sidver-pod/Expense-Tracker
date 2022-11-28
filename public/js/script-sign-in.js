@@ -39,7 +39,7 @@ function signIn(e) {
     else if(email.value === "") email.classList.add("error");
     else if(password.value === "") password.classList.add("error");
     else {
-        axios.post('http://localhost:3000/expense-tracker/sign-in', {
+        axios.post('https://localhost:3000/expense-tracker/sign-in', {
             username: username.value,
             phoneNo: phoneNo.value,
             email: email.value,

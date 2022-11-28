@@ -860,6 +860,16 @@ function dailyExpense(username, isPremiumUser) {
     h2.classList.add('Hi');
     container.appendChild(h2);
 
+    // Log Out
+    let logOut = document.createElement('button');
+    logOut.innerText = "⏻";
+    logOut.className = "log-out";
+    container.appendChild(logOut);
+    logOut.addEventListener('click', (e) => {
+        localStorage.removeItem('token');
+        location.reload();
+    });
+
     // Generate Report
     let generateReport = document.createElement('button');
     generateReport.innerText = 'Generate Report';

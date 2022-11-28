@@ -40,12 +40,26 @@ const certificate = fs.readFileSync('server.cert'); // public key + server ident
 
 app.use(bodyParser.json());
 app.use(cors());
-app.use(helmet()); // helps provide secure response headers
+/* Helmet */
+app.use(helmet()); // #1 helps provide secure response headers
+app.use(
+    helmet.contentSecurityPolicy({ // #2 making a few changes to Content-Security-Policy!
+      directives: {
+        "script-src": ["'self'", "https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.2/axios.min.js", "'sha256-GVFXnKDf+eUepT5PI/14bajfAss1KadNdHYkQcYg1SA='"]
+      }
+    })
+);
+/* morgan */
 app.use(morgan('combined', { stream: accessLogStream })); // helps log requests, responses and errors
 
 app.use('/expense-tracker', expenseTrackerRoute);
 app.use('/payment', paymentRoute);
 app.use('/password', passwordRoute);
+/*
+app.use((req, res) => {
+    res.sendFile(path.join(__dirname, req.url)); // sends the file from the file path mentioned in the URL to the Client!
+});
+*/
 
 // #1 One-Many association
 User.hasMany(DailyExpense);

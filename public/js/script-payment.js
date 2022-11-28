@@ -8,7 +8,7 @@ async function payment() {
     let token = localStorage.getItem('token');
         
     if(token !== null) {
-        const response  = await axios.get('http://localhost:3000/payment/premiumMembership',
+        const response  = await axios.get('https://localhost:3000/payment/premiumMembership',
         {
             headers: {
                 "Authorization" : 'Bearer ' + token
@@ -33,7 +33,7 @@ async function payment() {
             },
             // This handler function will handle the success payment
             "handler": function (response) {
-                axios.post('http://localhost:3000/payment/updateTransactionStatus',
+                axios.post('https://localhost:3000/payment/updateTransactionStatus',
                 {
                     order_id: options.order_id,
                     payment_id: response.razorpay_payment_id,

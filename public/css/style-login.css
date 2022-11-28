@@ -226,7 +226,7 @@ input:focus {
     left: 85px;
     color: salmon;
     padding: 5px;
-    font-family: 'Indie FLower', cursive;
+    font-family: 'Indie Flower', cursive;
     font-size: 35px;
 }
 
@@ -237,6 +237,24 @@ input:focus {
     color: black;
     padding: 5px;
     border-bottom: 1px dashed black;
+}
+
+.log-out {
+    position: absolute;
+    top: 80px;
+    right: 2%;
+    padding: 5px;
+    cursor: pointer;
+    font-size: larger;
+    height: 33px;
+    width: 31px;
+    border: 1px solid;
+    border-radius: 2px;
+}
+.log-out:hover {
+    background-color: rgb(207, 34, 46);
+    border-color: rgb(207, 34, 46);
+    color: #EFEFEF;
 }
 
 #premium {
@@ -378,7 +396,7 @@ input:focus {
 .GR-download-history:hover {
     border: 1px dashed rgb(147, 160, 158);
 }
-
+/*  */
 #changeTheme {
     position: absolute;
     top: 130px;
@@ -414,7 +432,7 @@ input:focus {
 .leaderboard-table-thead-dark {
     border-bottom-color: #f6f6f6;
 }
-
+/*  */
 #view-leaderboard {
     position: absolute;
     top: 165px;

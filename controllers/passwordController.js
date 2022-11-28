@@ -23,7 +23,7 @@ exports.forgotPassword = (req, res, next) => {
     })
     .then(result => {
         let uuid = result.dataValues.id; 
-        let link = `http://localhost:3000/password/reset/${uuid}`;
+        let link = `https://localhost:3000/password/reset/${uuid}`;
 
         // using Twilio SendGrid's v3 Node.js Library
         // https://github.com/sendgrid/sendgrid-nodejs
@@ -158,7 +158,7 @@ exports.resetPassword = (req, res, next) => {
                             }
                         }
                         else {
-                            axios.post('http://localhost:3000/password/update/${userId}', {
+                            axios.post('https://localhost:3000/password/update/${userId}', {
                                 'password': password1.value
                             })
                             .then(result => {
