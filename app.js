@@ -41,12 +41,20 @@ const certificate = fs.readFileSync('server.cert'); // public key + server ident
 app.use(bodyParser.json());
 app.use(cors());
 /* Helmet */
-app.use(helmet()); // #1 helps provide secure response headers
+app.use(helmet({
+  crossOriginEmbedderPolicy: false
+})); // #1 helps provide secure response headers
 app.use(
     helmet.contentSecurityPolicy({ // #2 making a few changes to Content-Security-Policy!
       directives: {
-        "script-src": ["'self'", "https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.2/axios.min.js", "'sha256-GVFXnKDf+eUepT5PI/14bajfAss1KadNdHYkQcYg1SA='"]
+        "script-src": ["'self'", "https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.2/axios.min.js", "'sha256-GVFXnKDf+eUepT5PI/14bajfAss1KadNdHYkQcYg1SA='", "https://checkout.razorpay.com/", "https://api.razorpay.com/"],
+        "img-src": ["'self'", "https://cdn.dribbble.com/", "https://img.freepik.com/"],
+        "frame-src": ["'self'", "https://api.razorpay.com/"],
+        "connect-src": ["'self'", "https://rudderstack.razorpay.com/", "https://localhost:3000/"]
       }
+    }),
+    helmet.crossOriginResourcePolicy({
+      policy: "cross-origin" // #3.1 setting 'cross-origin' for a background image from another server
     })
 );
 /* morgan */
@@ -55,11 +63,10 @@ app.use(morgan('combined', { stream: accessLogStream })); // helps log requests,
 app.use('/expense-tracker', expenseTrackerRoute);
 app.use('/payment', paymentRoute);
 app.use('/password', passwordRoute);
-/*
+
 app.use((req, res) => {
     res.sendFile(path.join(__dirname, req.url)); // sends the file from the file path mentioned in the URL to the Client!
 });
-*/
 
 // #1 One-Many association
 User.hasMany(DailyExpense);

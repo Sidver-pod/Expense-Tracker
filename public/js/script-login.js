@@ -316,7 +316,7 @@ function premiumMembership(e) {
     let buyContainer = document.createElement('a');
     popup.appendChild(buyContainer);
     buyContainer.classList.add('buy-container');
-    buyContainer.href = 'file:///Users/sidver/Documents/JS/Expense Tracker/views/payment.html';
+    buyContainer.href = 'https://localhost:3000/views/payment.html';
         //buy
         let buy = document.createElement('span');
         buyContainer.appendChild(buy);
