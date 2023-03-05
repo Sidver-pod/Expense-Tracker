@@ -15,7 +15,7 @@ router.post('/my-expense', authenticateToken, expenseTrackerController.getMyExpe
 router.post('/my-expense/delete', authenticateToken, expenseTrackerController.deleteMyExpense);
 router.get('/my-leaderboard', authenticateToken, expenseTrackerController.getMyLeaderboard);
 router.get('/report', authenticateToken, expenseTrackerController.getMyReport);
-router.get('/report/download', authenticateToken, expenseTrackerController.downloadMyReport);
+router.post('/report/download', authenticateToken, expenseTrackerController.downloadMyReport);
 router.get('/report/history', authenticateToken, expenseTrackerController.getDownloadHistory);
 
 function authenticateToken(req, res, next) {

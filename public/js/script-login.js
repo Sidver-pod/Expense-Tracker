@@ -328,10 +328,12 @@ function deleteMyExpense(e) {
     e.preventDefault();
 
     let id = e.target.id;
+    let expenseAmount = Number(e.target.parentElement.previousElementSibling.previousElementSibling.innerText);
     let token = localStorage.getItem('token');
 
     axios.post('https://localhost:3000/expense-tracker/my-expense/delete', {
-        'id': id
+        'id': id,
+        'expenseAmount': expenseAmount
     },
     {
         headers: {
@@ -686,7 +688,7 @@ function myExpenses(e) {
                             }
                         })
                         .then(result => {
-                            let user_data = result.data.user_data; console.log(user_data);
+                            let user_data = result.data.user_data;
                             let totalExpenses = result.data.totalExpenses;
                             let EXPENSES_PER_PAGE = result.data.EXPENSES_PER_PAGE;
 
@@ -907,6 +909,8 @@ function dailyExpense(username, isPremiumUser) {
         mainContentContainer.className = "main-content-container";
 
         let token = localStorage.getItem('token');
+        let reportArr; // optimising by storing report data; this prevents "downloadButton" from querying the database again!
+        let totalExpense = 0;
 
         // get all relevant data from the database
         axios.get('https://localhost:3000/expense-tracker/report', {
@@ -915,25 +919,7 @@ function dailyExpense(username, isPremiumUser) {
             }
         })
         .then(userData => {
-            let arr = userData.data.arr;
-            let myMap = new Map(); // new hashtable
-
-            for(i of arr) {
-                if(myMap.get(i.category)) {
-                    let oldExpense = myMap.get(i.category).expense;
-                    let newExpense = oldExpense + i.expense;
-                    let newData = {
-                        category: i.category,
-                        expense: newExpense,
-                        date: myMap.get(i.category).date
-                    }
-                    myMap.set(i.category, newData); // replacing old data with new
-                }
-                else {
-                    // creating a new 'key : value' in hashtable
-                    myMap.set(i.category, i);
-                }
-            }
+            reportArr = userData.data.arr;
 
             let table = document.createElement('table');
             mainContentContainer.appendChild(table);
@@ -947,36 +933,27 @@ function dailyExpense(username, isPremiumUser) {
 
             let td_1 = document.createElement('td');
             tr_1.appendChild(td_1);
-            td_1.innerText = "Date";
+            td_1.innerText = "Category";
 
             let td_2 = document.createElement('td');
             tr_1.appendChild(td_2);
-            td_2.innerText = "Category";
-
-            let td_3 = document.createElement('td');
-            tr_1.appendChild(td_3);
-            td_3.innerText = "Expense";
+            td_2.innerText = "Expense";
 
             // #2
-            let totalExpense = 0;
             let tbody = document.createElement('tbody');
             table.appendChild(tbody);
-            for(i of myMap) {
+            for(i of reportArr) {
                 let tr_2 = document.createElement('tr');
                 tbody.appendChild(tr_2);
 
                 let body_td_1 = document.createElement('td');
                 tr_2.appendChild(body_td_1);
-                body_td_1.innerText = i[1].date;
+                body_td_1.innerText = i.category;
 
                 let body_td_2 = document.createElement('td');
                 tr_2.appendChild(body_td_2);
-                body_td_2.innerText = i[1].category;
-
-                let body_td_3 = document.createElement('td');
-                tr_2.appendChild(body_td_3);
-                body_td_3.innerText = "₹" + i[1].expense;
-                totalExpense += i[1].expense;
+                body_td_2.innerText = "₹" + i.amount;
+                totalExpense += i.amount;
             }
 
             // #3
@@ -989,7 +966,7 @@ function dailyExpense(username, isPremiumUser) {
             let foot_td_1 = document.createElement('td');
             tr_3.appendChild(foot_td_1);
             foot_td_1.innerText = "Total";
-            foot_td_1.colSpan = "2";
+            foot_td_1.colSpan = "1";
 
             let foot_td_2 = document.createElement('td');
             tr_3.appendChild(foot_td_2);
@@ -1103,13 +1080,16 @@ function dailyExpense(username, isPremiumUser) {
             downloadButton.addEventListener('click', (e) => {
                 let token = localStorage.getItem('token');
                 // the backend talks to Amazon S3 and uploads the user data in a file format; Amazon S3 sends back the URL of the respective file to the backend as a response; the backend then sends back a response to the frontend containing the URL of the file; the URL is then put into an 'a' tag and is made to open which then leads to the browser downloading the file indirectly into the user's computer memory!
-                axios.get('https://localhost:3000/expense-tracker/report/download', {
+                axios.post('https://localhost:3000/expense-tracker/report/download', {
+                    reportArr: reportArr,
+                    totalExpense: totalExpense
+                },
+                {
                     headers: {
                         'Authorization': 'Bearer ' + token
                     }
                 })
                 .then(result => {
-                    console.log(result.data.fileURL);
                     let fileURL = result.data.fileURL;
                     let a = document.createElement('a');
                     a.href = fileURL;

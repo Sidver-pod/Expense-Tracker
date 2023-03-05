@@ -1,3 +1,4 @@
+const sequelize = require('../util/database'); // for raw SQL query
 const User = require('../models/user');
 const DailyExpense = require('../models/dailyExpense');
 const DownloadHistory = require('../models/downloadHistory');
@@ -26,6 +27,7 @@ exports.postSignIn = (req, res, next) => {
     let phoneNo = req.body.phoneNo;
     let email = req.body.email;
     let password = req.body.password;
+    let totalExpenseAmount = 0;
     
     //bcrypt password encryption
     bcrypt
@@ -38,7 +40,8 @@ exports.postSignIn = (req, res, next) => {
                 username: username,
                 phoneNo: phoneNo,
                 email: email,
-                password: hash
+                password: hash,
+                totalExpenseAmount: totalExpenseAmount
             });
         })
         .then(result => {
@@ -66,10 +69,14 @@ exports.postLogin = (req, res, next) => {
     let email = req.body.email;
     let plainTextPassword = req.body.password;
 
+    // optimised SQL query!
     User.findAll({
         where: {
             email: email
-        }
+        },
+        attributes: [
+            'id', 'username', 'password', 'isPremiumUser'
+        ]
     })
     .then(user => {
         // 'email' is correct! (the length is greater than 0)
@@ -126,14 +133,27 @@ exports.postLogin = (req, res, next) => {
 };
 
 exports.postTrackExpense = (req, res, next) => {
+    const userId = req.userId;
     let category = req.body.track.category;
     let expense = req.body.track.expense;
     let description = req.body.track.description;
 
+    /* #1 adding a new expense */
     req.user.createDailyExpense({
         category: category,
         amount: expense,
         description: description
+    })
+    .then(result => {
+        /* #2 updating totalExpenseAmount in User table */
+        let oldExpenseAmount = req.user.dataValues.totalExpenseAmount;
+        let newExpenseAmount = Number(oldExpenseAmount) + Number(expense);
+
+        return User.update({ totalExpenseAmount: newExpenseAmount }, {
+            where: {
+                id: userId
+            }
+        });
     })
     .then(result => {
         res.status(200).json({
@@ -152,10 +172,14 @@ exports.postTrackExpense = (req, res, next) => {
 exports.getTrackExpense = (req, res, next) => {
     let userId = req.userId;
 
+    // optimised SQL query!
     User.findAll({
         where: {
             id: userId
-        }
+        },
+        attributes: [
+            'username', 'isPremiumUser'
+        ]
     })
     .then(user => {
         if(user.length) {
@@ -212,12 +236,16 @@ exports.getMyExpense = (req, res, next) => {
         }
         // for Pagination of all the expenses
         else {
+            // optimised SQL query!
             return DailyExpense.findAll({
                 where: {
                     userId: userId
                 },
                 offset: (currentPageNumber - 1) * EXPENSES_PER_PAGE,
-                limit: EXPENSES_PER_PAGE
+                limit: EXPENSES_PER_PAGE,
+                attributes: [
+                    'id', 'category', 'amount', 'description'
+                ]
             })
         }
     })
@@ -244,7 +272,9 @@ exports.getMyExpense = (req, res, next) => {
 exports.deleteMyExpense = (req, res, next) => {
     const userId = req.userId;
     const id = req.body.id;
+    const expenseAmount = req.body.expenseAmount;
 
+    /* #1 deleting an expense */
     DailyExpense.destroy({
         where: {
             id: id,
@@ -252,7 +282,17 @@ exports.deleteMyExpense = (req, res, next) => {
         }
     })
     .then(result => {
-        console.log(result);
+        /* #2 updating totalExpenseAmount in User table */
+        let oldExpenseAmount = req.user.dataValues.totalExpenseAmount;
+        let newExpenseAmount = Number(oldExpenseAmount) - Number(expenseAmount);
+
+        return User.update({ totalExpenseAmount: newExpenseAmount }, {
+            where: {
+                id: userId
+            }
+        });
+    })
+    .then(result => {
         res.status(200).json({
             'delete': 'successful'
         });
@@ -264,67 +304,15 @@ exports.deleteMyExpense = (req, res, next) => {
 };
 
 exports.getMyLeaderboard = (req, res, next) => {
-    let arr = [];
-
-    DailyExpense.findAll()
-    .then(users_data => {
-        let myMap = new Map(); // hashtable
-
-        for(let user_data of users_data) {
-            let userId = user_data.dataValues.userId;
-            let expenseAmount = user_data.dataValues.amount;
-
-            // for a 'userId' that already exists in the hashtable
-            if(myMap.get(userId)) {
-                myMap.set(userId, (myMap.get(userId) + expenseAmount));
-            }
-            // for a new 'userId'
-            else {
-                myMap.set(userId, expenseAmount);
-                arr.push({
-                    userId: userId,
-                    name: 'temporary',
-                    totalExpenseAmount: 0
-                });
-            }
-        }
-
-        // putting all the summed up values from the hashtable into the array's objects
-        for(let i of arr) {
-            let totalExpenseAmount = myMap.get(i.userId);
-            i.totalExpenseAmount = totalExpenseAmount;
-        }
-
-        // sorting the array with respect to the 'totalExpenseAmount'
-        arr.sort((a, b) => {
-            if(a.totalExpenseAmount < b.totalExpenseAmount) {
-                return -1;
-            }
-            else if(a.totalExpenseAmount > b.totalExpenseAmount) {
-                return 1;
-            }
-            else return 0;
-        });
-    })
-    .then(() => {
-        return User.findAll();
-    })
-    .then(users_data => {
-        let myMap = new Map(); // new hashtable
-        
-        for(let user_data of users_data) {
-            let userId = user_data.dataValues.id;
-            let username = user_data.dataValues.username;
-            myMap.set(userId, username);
-        }
-
-        for(let i of arr) {
-            let name = myMap.get(i.userId);
-            i.name = name;
-        }
-
+    // optimised SQL query!
+    sequelize.query(`
+        SELECT id AS userId, username AS name, totalExpenseAmount
+        FROM users
+        ORDER BY totalExpenseAmount ASC;
+    `)
+    .then(result => {
         res.status(200).json({
-            arr : arr,
+            arr : result[0],
             userId: req.userId
         });
     })
@@ -334,54 +322,17 @@ exports.getMyLeaderboard = (req, res, next) => {
     });
 };
 
-// #1 get all the data from 'DailyExpense'
-
-// #2 keep a hashtable to bookmark => new IDs with an expense amount / increment existing ones by adding
-    // when you come across a 'new ID' => form a new element in an array with values {userId: #, name: 'temporary', totalExpenseAmount: 0}
-
-// #3 at the end, after all of the above are accomplished, iterate through the array and check against the 'userId' in the hashtable and take out the 'expense amount' and store it in totalExpenseAmount for every element of the array
-
-// #4 sort the array with respect to totalExpenseAmount
-
-// #5 Now, get all the data from 'User'
-
-// #6 Iterate through the data and keep recording the 'names' in a new hashtable with 'userId' as the key
-
-// #7 Iterate through the array and put in the correct 'name' with the help of the 'userId'
-
-// #8 send the array!
-
-let getMyReport;
-let report; // for 'downloadMyReport'
-exports.getMyReport = getMyReport = (req, res, next) => {
-    DailyExpense.findAll({
-        where: {
-            userId: req.userId
-        }
-    })
+exports.getMyReport = (req, res, next) => {
+    // optimised SQL query!
+    sequelize.query(`
+        SELECT category, SUM(amount) AS amount
+        FROM dailyExpenses
+        WHERE userId = ${req.userId}
+        GROUP BY category;
+    `)
     .then(userData => {
-        let arr = [];
-        
-        for(i of userData) {
-            let category = i.dataValues.category;
-            let amount = i.dataValues.amount;
-            let createdAt = i.dataValues.createdAt;
-
-            let date = createdAt.getDate() + '/' + (createdAt.getMonth()+1 < 10 ? '0' + (createdAt.getMonth()+1) : createdAt.getMonth()+1) + '/' + createdAt.getFullYear();
-
-            let obj = {
-                category : category,
-                expense : amount,
-                date : date
-            }
-
-            arr.push(obj);
-        }
-
-        report = arr; // for 'downloadMyReport'
-        
         res.status(200).json({
-            arr : arr
+            arr : userData[0]
         });
     })
     .catch(err => {
@@ -392,40 +343,18 @@ exports.getMyReport = getMyReport = (req, res, next) => {
 
 exports.downloadMyReport = async (req, res, next) => {
     try {
-        await req.userId.getMyReport; // helps assign user data to the variable 'report'
+        // optimised by minimizing redundant calls to the Database (fetched data from frontend instead!)
+        let report = req.body.reportArr;
+        let totalExpense = req.body.totalExpense;
 
         // client error!
         if(report === undefined) {
             return res.status(400).json({fileURL: undefined, success: false, error: 'Client Error'}); // Bad Request
         }
-
-        let myMap = new Map(); // new hashtable
-
-        // storing data uniquely in hashtable according to 'category' thus allowing to sum up expenses w.r.t. category
-        for(i of report) {
-            if(myMap.get(i.category)) {
-                let oldExpense = myMap.get(i.category).expense;
-                let newExpense = oldExpense + i.expense;
-                let newData = {
-                    category: i.category,
-                    expense: newExpense,
-                    date: myMap.get(i.category).date
-                }
-                myMap.set(i.category, newData); // replacing old data with new
-            }
-            else {
-                // creating a new 'key : value' in hashtable
-                myMap.set(i.category, i);
-            }
-        }
-
-        let newReport = [];
-        for(i of myMap) {
-            newReport.push(i[1]);
-        }
-
+        
         let obj = {
-            data: newReport
+            data: report,
+            totalExpense: totalExpense
         }
 
         let stringifiedData = JSON.stringify(obj);
@@ -448,13 +377,16 @@ exports.downloadMyReport = async (req, res, next) => {
 }
 
 exports.getDownloadHistory = (req, res, next) => {
+    // optimised SQL query!
     DownloadHistory.findAll({
         where: {
             userId: req.userId
-        }
+        },
+        attributes: [
+            'url', 'createdAt'
+        ]
     })
     .then(userDownloadHistory => {
-        console.log(userDownloadHistory);
         res.status(200).json({history: userDownloadHistory});
     })
     .catch(err => {
