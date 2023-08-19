@@ -10,7 +10,7 @@ It goes by the name of _Expense-Tracker_ 💰. It is a website designed to help 
 
 Finally to save all that information the user would have to click a button labelled 'Track'. All that information would then get saved into a database. A user could then view all of their expenses in a form of a tabulated list in a paginated fashion.
 
-## Feautures
+## Features
 
 - _Sign-up_ page ✍️ for a new user.
 
